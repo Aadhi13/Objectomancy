@@ -17,9 +17,9 @@ export default function Camera() {
   const [modelStatus, setModelStatus] = useState('loading');
   const [errorMsg, setErrorMsg] = useState('');
   
-  // Store smoothed active detection for rendering
-  const [activeDetection, setActiveDetection] = useState(null);
-  const [discoveryEvent, setDiscoveryEvent] = useState(null);
+  // Store smoothed active detections for rendering
+  const [activeDetections, setActiveDetections] = useState([]);
+  const [discoveryEvents, setDiscoveryEvents] = useState([]);
   
   // Hardware Zoom & Lens state
   const [zoomCapability, setZoomCapability] = useState(null);
@@ -30,14 +30,25 @@ export default function Camera() {
   const [selectedCameraId, setSelectedCameraId] = useState('');
   const hasFetchedCamerasRef = useRef(false);
   
-  // Hit/miss tracking state
-  const trackingRef = useRef({
-    hits: 0,
-    misses: 0,
-    isActive: false,
-    box: null,
-    score: 0
-  });
+  // Hit/miss tracking state array
+  const trackingRef = useRef([]);
+  const nextTrackIdRef = useRef(1);
+
+  // Helper for bounding box overlap matching
+  function getIoU(box1, box2) {
+    const xA = Math.max(box1.x, box2.x);
+    const yA = Math.max(box1.y, box2.y);
+    const xB = Math.min(box1.x + box1.width, box2.x + box2.width);
+    const yB = Math.min(box1.y + box1.height, box2.y + box2.height);
+
+    const interArea = Math.max(0, xB - xA) * Math.max(0, yB - yA);
+    if (interArea === 0) return 0;
+
+    const box1Area = box1.width * box1.height;
+    const box2Area = box2.width * box2.height;
+
+    return interArea / (box1Area + box2Area - interArea);
+  }
 
   // Setup camera
   useEffect(() => {
@@ -163,11 +174,7 @@ export default function Camera() {
                 p => getEnchantmentForClass(p.class) && p.score >= 0.6
               );
 
-              if (supportedPredictions.length > 0) {
-                // Focus on the most confident
-                const bestMatch = supportedPredictions[0];
-                const enchantment = getEnchantmentForClass(bestMatch.class);
-                
+              if (supportedPredictions.length > 0 || trackingRef.current.length > 0) {
                 const vW = video.videoWidth;
                 const vH = video.videoHeight;
                 const cW = video.clientWidth;
@@ -180,65 +187,115 @@ export default function Camera() {
                 const oX = (cW - dW) / 2;
                 const oY = (cH - dH) / 2;
 
-                const [x, y, w, h] = bestMatch.bbox;
-                const mappedBox = {
-                  class: bestMatch.class,
-                  enchantment,
-                  x: x * scale + oX,
-                  y: y * scale + oY,
-                  width: w * scale,
-                  height: h * scale,
-                  score: parseFloat(bestMatch.score.toFixed(2))
-                };
+                const mappedPredictions = supportedPredictions.map(p => {
+                  const [x, y, w, h] = p.bbox;
+                  return {
+                    class: p.class,
+                    enchantment: getEnchantmentForClass(p.class),
+                    x: x * scale + oX,
+                    y: y * scale + oY,
+                    width: w * scale,
+                    height: h * scale,
+                    score: parseFloat(p.score.toFixed(2))
+                  };
+                });
                 
-                const t = trackingRef.current;
-                t.misses = 0;
-                t.hits++;
+                const tracks = trackingRef.current;
                 
-                // Trigger discovery after 2 valid hits
-                if (!t.isActive && t.hits >= 2) {
-                  t.isActive = true;
-                  console.log(`✨ Discovery event: ${enchantment.displayName} found!`);
-                  playDiscoveryChime();
+                // Mark all tracks as unmatched
+                tracks.forEach(t => t.matchedThisFrame = false);
+
+                // Match predictions to tracks
+                mappedPredictions.forEach(pred => {
+                  let bestMatch = null;
+                  let bestIoU = 0.3; // threshold for overlap
                   
-                  setDiscoveryEvent({
-                    x: mappedBox.x,
-                    y: mappedBox.y,
-                    width: mappedBox.width,
-                    height: mappedBox.height
+                  tracks.forEach(t => {
+                    if (t.class === pred.class && !t.matchedThisFrame) {
+                      const iou = getIoU(t.box, pred);
+                      if (iou > bestIoU) {
+                        bestIoU = iou;
+                        bestMatch = t;
+                      }
+                    }
                   });
-                  setTimeout(() => setDiscoveryEvent(null), 1000);
-                }
-                
-                if (t.isActive) {
-                  if (t.box) {
+
+                  if (bestMatch) {
+                    bestMatch.matchedThisFrame = true;
+                    bestMatch.misses = 0;
+                    bestMatch.hits++;
+                    
                     // Exponential moving average for positional smoothing
                     const alpha = 0.5;
-                    t.box = {
-                      ...mappedBox,
-                      x: t.box.x * (1 - alpha) + mappedBox.x * alpha,
-                      y: t.box.y * (1 - alpha) + mappedBox.y * alpha,
-                      width: t.box.width * (1 - alpha) + mappedBox.width * alpha,
-                      height: t.box.height * (1 - alpha) + mappedBox.height * alpha,
+                    bestMatch.box = {
+                      ...pred,
+                      x: bestMatch.box.x * (1 - alpha) + pred.x * alpha,
+                      y: bestMatch.box.y * (1 - alpha) + pred.y * alpha,
+                      width: bestMatch.box.width * (1 - alpha) + pred.width * alpha,
+                      height: bestMatch.box.height * (1 - alpha) + pred.height * alpha,
                     };
+                    bestMatch.score = pred.score;
                   } else {
-                    t.box = { ...mappedBox };
+                    // New track
+                    tracks.push({
+                      id: nextTrackIdRef.current++,
+                      class: pred.class,
+                      enchantment: pred.enchantment,
+                      hits: 1,
+                      misses: 0,
+                      isActive: false,
+                      box: { ...pred },
+                      score: pred.score,
+                      matchedThisFrame: true
+                    });
                   }
-                  t.score = mappedBox.score;
-                  setActiveDetection({ ...t.box });
-                }
-              } else {
-                const t = trackingRef.current;
-                t.hits = 0;
-                t.misses++;
+                });
+
+                // Process unmatched tracks and update active statuses
+                const activeList = [];
+                const discoveries = [];
                 
-                // Hide after 5 consecutive misses
-                if (t.isActive && t.misses >= 5) {
-                  t.isActive = false;
-                  t.box = null;
-                  setActiveDetection(null);
-                  console.log("💨 Object lost.");
+                for (let i = tracks.length - 1; i >= 0; i--) {
+                  const t = tracks[i];
+                  if (!t.matchedThisFrame) {
+                    t.hits = 0;
+                    t.misses++;
+                  }
+                  
+                  // Hide after 5 consecutive misses
+                  if (t.misses >= 5) {
+                    if (t.isActive) console.log(`💨 Object lost: ${t.enchantment.displayName}`);
+                    tracks.splice(i, 1);
+                    continue;
+                  }
+                  
+                  // Trigger discovery after 2 valid hits
+                  if (!t.isActive && t.hits >= 2) {
+                    t.isActive = true;
+                    console.log(`✨ Discovery event: ${t.enchantment.displayName} found!`);
+                    discoveries.push({
+                      id: Date.now() + i,
+                      x: t.box.x,
+                      y: t.box.y,
+                      width: t.box.width,
+                      height: t.box.height
+                    });
+                  }
+                  
+                  if (t.isActive) {
+                    activeList.push({ ...t, box: { ...t.box } });
+                  }
                 }
+
+                if (discoveries.length > 0) {
+                  playDiscoveryChime();
+                  setDiscoveryEvents(prev => [...prev, ...discoveries]);
+                  setTimeout(() => {
+                    setDiscoveryEvents(prev => prev.filter(d => !discoveries.find(nd => nd.id === d.id)));
+                  }, 1000);
+                }
+
+                setActiveDetections(activeList);
               }
             } catch (err) {
               console.error("Detection error:", err);
@@ -366,22 +423,23 @@ export default function Camera() {
         className={`camera-video ${!isLoading && !hasError ? 'visible' : 'hidden'}`}
       />
       
-      {discoveryEvent && (
+      {discoveryEvents.map(evt => (
         <div 
+          key={evt.id}
           className="discovery-flourish"
           style={{
-            left: `${discoveryEvent.x + discoveryEvent.width/2}px`,
-            top: `${discoveryEvent.y + discoveryEvent.height/2}px`
+            left: `${evt.x + evt.width/2}px`,
+            top: `${evt.y + evt.height/2}px`
           }}
         >
            <div className="flourish-ring"></div>
            <div className="flourish-burst"></div>
         </div>
-      )}
+      ))}
       
-      {activeDetection && activeDetection.enchantment && (
-        <SpellPanel detection={activeDetection} spell={activeDetection.enchantment} />
-      )}
+      {activeDetections.map(det => (
+        <SpellPanel key={det.id} detection={det.box} spell={det.enchantment} />
+      ))}
     </div>
   );
 }
