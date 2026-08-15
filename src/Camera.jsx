@@ -9,7 +9,6 @@ import { useGrimoire } from './useGrimoire';
 import Grimoire from './Grimoire';
 import { useHunt } from './useHunt';
 import HuntPanel from './HuntPanel';
-import TrueForm from './TrueForm';
 import './Camera.css';
 
 export default function Camera() {
@@ -468,10 +467,7 @@ export default function Camera() {
       ))}
       
       {activeDetections.map(det => (
-        <React.Fragment key={det.id}>
-          <TrueForm detection={det.box} type={det.class} />
-          <SpellPanel detection={det.box} spell={det.enchantment} />
-        </React.Fragment>
+        <SpellPanel key={det.id} detection={det.box} spell={det.enchantment} />
       ))}
     </div>
   );
