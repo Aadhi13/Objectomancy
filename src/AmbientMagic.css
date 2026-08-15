@@ -1,0 +1,39 @@
+.ambient-magic-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5; /* Above video, below UI */
+  overflow: hidden;
+}
+
+.magic-mote {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-gold-light);
+  box-shadow: 0 0 8px 2px var(--color-gold-accent);
+  opacity: 0;
+  animation: float-mote linear infinite;
+}
+
+@keyframes float-mote {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-40px) translateX(15px);
+    opacity: 0.8;
+  }
+  75% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-80px) translateX(-15px);
+    opacity: 0;
+  }
+}

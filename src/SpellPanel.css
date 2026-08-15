@@ -2,6 +2,8 @@
   position: absolute;
   width: 280px;
   background-color: var(--color-surface);
+  background-image: var(--parchment-texture);
+  background-blend-mode: overlay;
   border: 2px solid var(--color-gold-accent);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 0, 0, 0.9);
   padding: 20px;

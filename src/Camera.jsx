@@ -3,6 +3,7 @@ import '@tensorflow/tfjs';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import { getEnchantmentForClass } from './spells';
 import SpellPanel from './SpellPanel';
+import AmbientMagic from './AmbientMagic';
 import { playDiscoveryChime } from './audio';
 import './Camera.css';
 
@@ -298,6 +299,7 @@ export default function Camera() {
 
       {!isLoading && !hasError && (
         <>
+          <AmbientMagic />
           {isArcaneSightOpen && (
             <div 
               className="arcane-backdrop" 
