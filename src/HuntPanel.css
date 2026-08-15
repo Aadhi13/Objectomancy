@@ -1,0 +1,169 @@
+.start-hunt-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+  background: var(--color-surface);
+  border: 1px solid var(--color-gold-accent);
+  color: var(--color-gold-light);
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+  transition: all 0.2s ease;
+}
+
+.start-hunt-button:hover {
+  background: var(--color-surface-secondary);
+  box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4);
+  transform: translateY(-2px);
+}
+
+.hunt-panel {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+  background: var(--color-surface);
+  background-image: var(--parchment-texture);
+  background-blend-mode: overlay;
+  border: 1px solid var(--color-gold-accent);
+  border-radius: 6px;
+  padding: 16px;
+  width: 280px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+  animation: slide-in-left 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.hunt-panel.complete {
+  border-color: #22c55e;
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+.hunt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.hunt-title {
+  font-family: var(--font-display);
+  color: var(--color-gold-light);
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.cancel-hunt {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.cancel-hunt:hover {
+  color: var(--color-gold-accent);
+}
+
+.hunt-subtitle {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--color-gold);
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.hunt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hunt-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  transition: all 0.3s;
+}
+
+.hunt-item.pending {
+  color: var(--color-text-primary);
+}
+
+.hunt-item.found {
+  color: #22c55e; /* Green */
+  text-shadow: 0 0 5px rgba(34, 197, 94, 0.5);
+  transform: scale(1.02);
+}
+
+.status-icon {
+  font-size: 1.1rem;
+}
+
+.target-name {
+  flex-grow: 1;
+}
+
+.hunt-complete-banner {
+  text-align: center;
+  padding: 10px 0;
+  animation: fade-in 0.5s ease-out;
+}
+
+.hunt-complete-banner .runes {
+  font-size: 2rem;
+  color: #22c55e;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.hunt-complete-banner h4 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--color-text-primary);
+  margin: 0 0 5px 0;
+}
+
+.hunt-complete-banner p {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin: 0 0 15px 0;
+}
+
+.restart-hunt-button {
+  background: transparent;
+  border: 1px solid #22c55e;
+  color: #22c55e;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.restart-hunt-button:hover {
+  background: rgba(34, 197, 94, 0.1);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
+}
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}

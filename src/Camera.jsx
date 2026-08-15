@@ -7,6 +7,8 @@ import AmbientMagic from './AmbientMagic';
 import { playDiscoveryChime } from './audio';
 import { useGrimoire } from './useGrimoire';
 import Grimoire from './Grimoire';
+import { useHunt } from './useHunt';
+import HuntPanel from './HuntPanel';
 import './Camera.css';
 
 export default function Camera() {
@@ -35,6 +37,9 @@ export default function Camera() {
   // Grimoire state
   const { discovered, discover } = useGrimoire();
   const [isGrimoireOpen, setIsGrimoireOpen] = useState(false);
+  
+  // Hunt state
+  const huntState = useHunt();
   
   // Hit/miss tracking state array
   const trackingRef = useRef([]);
@@ -279,6 +284,7 @@ export default function Camera() {
                   if (!t.isActive && t.hits >= 2) {
                     t.isActive = true;
                     discover(t.class);
+                    huntState.handleDiscovery(t.class);
                     console.log(`✨ Discovery event: ${t.enchantment.displayName} found!`);
                     discoveries.push({
                       id: Date.now() + i,
@@ -364,6 +370,9 @@ export default function Camera() {
       {!isLoading && !hasError && (
         <>
           <AmbientMagic />
+          
+          <HuntPanel {...huntState} />
+          
           {isArcaneSightOpen && (
             <div 
               className="arcane-backdrop" 
