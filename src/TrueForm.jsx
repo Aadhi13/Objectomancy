@@ -1,19 +1,31 @@
 import React from 'react';
+import { TRUE_FORMS, FALLBACK_TRUE_FORM } from './trueForms';
+import { SPELLS } from './spells';
 import './TrueForm.css';
 
 /**
- * True-Form Transformation — fires ONCE per discovery event.
- * Renders inside the discoveryEvents loop so it auto-removes after timeout.
- * Uses overflow:hidden to keep all effects strictly within the bbox.
+ * True-Form Transformation — data-driven, fires ONCE per discovery event.
+ *
+ * Reads asset config from trueForms.js. Falls back to a generic arcane circle
+ * for objects without a dedicated true-form asset. Uses CSS custom properties
+ * (--tf-color) for per-object color theming, identical pattern to SpellPanel.
  */
 export default function TrueForm({ x, y, width, height, objectClass }) {
-  if (objectClass !== 'bottle') return null;
+  const spell = SPELLS[objectClass];
+  if (!spell) return null;
+
+  const form = TRUE_FORMS[objectClass] || FALLBACK_TRUE_FORM;
+  const color = form.color || spell.color || '#d4a574';
+  const rune = form.rune || spell.rune || 'ᛟ';
+  const runeColor = form.runeColor || '#f5f5f5';
+  const runeY = form.runeY || 48;
 
   const style = {
     left: `${x}px`,
     top: `${y}px`,
     width: `${width}px`,
-    height: `${height}px`
+    height: `${height}px`,
+    '--tf-color': color
   };
 
   return (
@@ -23,10 +35,9 @@ export default function TrueForm({ x, y, width, height, objectClass }) {
 
       {/* Phase 2: Runes (450ms) */}
       <div className="tf-phase tf-runes">
-        <span>ᛗ</span>
-        <span>ᚹ</span>
-        <span>ᛈ</span>
-        <span>ᚢ</span>
+        <span>{rune}</span>
+        <span>{spell.rune}</span>
+        <span>{rune}</span>
       </div>
 
       {/* Phase 3: Energy ring (650ms) */}
@@ -34,17 +45,28 @@ export default function TrueForm({ x, y, width, height, objectClass }) {
 
       {/* Phase 4+5: True-form artwork (850ms → stable at 1400ms) */}
       <div className="tf-phase tf-artwork">
-        <svg viewBox="0 0 80 130" className="tf-vessel-svg">
-          <path
-            d="M32 8 L48 8 L48 32 L66 62 L66 108 C66 120 56 122 40 122 C24 122 14 120 14 108 L14 62 L32 32 Z"
-            className="tf-flask-path"
-          />
-          <path
-            d="M20 72 Q40 68 60 72 L60 105 C60 112 52 114 40 114 C28 114 20 112 20 105 Z"
-            className="tf-liquid-path"
-          />
-          <rect x="34" y="2" width="12" height="8" rx="1" className="tf-cork-path" />
-          <text x="40" y="100" textAnchor="middle" className="tf-inner-rune">ᛗ</text>
+        <svg viewBox={form.svgViewBox} className="tf-svg">
+          {(form.paths || []).map((p, i) => (
+            <path key={i} d={p.d} className={p.className} />
+          ))}
+          {(form.rects || []).map((r, i) => (
+            <rect
+              key={`r${i}`}
+              x={r.x} y={r.y}
+              width={r.width} height={r.height}
+              rx={r.rx || 0}
+              className={r.className}
+            />
+          ))}
+          <text
+            x="50%"
+            y={runeY}
+            textAnchor="middle"
+            className="tf-inner-rune"
+            style={{ fill: runeColor }}
+          >
+            {rune}
+          </text>
         </svg>
       </div>
     </div>
