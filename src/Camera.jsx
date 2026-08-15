@@ -5,6 +5,8 @@ import { getEnchantmentForClass } from './spells';
 import SpellPanel from './SpellPanel';
 import AmbientMagic from './AmbientMagic';
 import { playDiscoveryChime } from './audio';
+import { useGrimoire } from './useGrimoire';
+import Grimoire from './Grimoire';
 import './Camera.css';
 
 export default function Camera() {
@@ -29,6 +31,10 @@ export default function Camera() {
   const [availableCameras, setAvailableCameras] = useState([]);
   const [selectedCameraId, setSelectedCameraId] = useState('');
   const hasFetchedCamerasRef = useRef(false);
+  
+  // Grimoire state
+  const { discovered, discover } = useGrimoire();
+  const [isGrimoireOpen, setIsGrimoireOpen] = useState(false);
   
   // Hit/miss tracking state array
   const trackingRef = useRef([]);
@@ -272,6 +278,7 @@ export default function Camera() {
                   // Trigger discovery after 2 valid hits
                   if (!t.isActive && t.hits >= 2) {
                     t.isActive = true;
+                    discover(t.class);
                     console.log(`✨ Discovery event: ${t.enchantment.displayName} found!`);
                     discoveries.push({
                       id: Date.now() + i,
@@ -405,6 +412,15 @@ export default function Camera() {
             )}
             
             <button 
+              className="arcane-sight-toggle grimoire-toggle"
+              onClick={() => setIsGrimoireOpen(true)}
+              aria-label="Open Grimoire"
+              style={{ bottom: '90px' }} // Position above Arcane Sight
+            >
+              <span className="runes">ᚷ</span>
+            </button>
+            
+            <button 
               className="arcane-sight-toggle"
               onClick={() => setIsArcaneSightOpen(!isArcaneSightOpen)}
               aria-label="Toggle Arcane Sight"
@@ -412,6 +428,10 @@ export default function Camera() {
               <span className="runes">ᛟ</span>
             </button>
           </div>
+          
+          {isGrimoireOpen && (
+            <Grimoire discoveredIds={discovered} onClose={() => setIsGrimoireOpen(false)} />
+          )}
         </>
       )}
 
