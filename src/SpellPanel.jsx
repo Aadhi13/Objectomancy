@@ -22,7 +22,8 @@ export default function SpellPanel({ detection, spell }) {
   const panelStyle = {
     left: `${detection.x + detection.width / 2}px`,
     top: `${detection.y + detection.height + 20}px`,
-    transform: 'translateX(-50%)'
+    transform: 'translateX(-50%)',
+    '--spell-color': spell.color || 'var(--color-gold-accent)'
   };
 
   return (
@@ -39,10 +40,18 @@ export default function SpellPanel({ detection, spell }) {
       )}
 
       <div className="spell-panel-content">
+        <div className="spell-identity">
+          <span className="spell-rune">{spell.rune || "ᛟ"}</span>
+          <div className="spell-meta">
+            <span className={`spell-rarity rarity-${(spell.rarity || 'common').toLowerCase()}`}>{spell.rarity || 'Common'}</span>
+            <span className="spell-element">{spell.element || 'Arcane'}</span>
+          </div>
+        </div>
+
         <div className="spell-header">
-          <span className="runes left-runes">ᚼᛖ</span>
+          <span className="runes left-runes">{spell.rune}ᛖ</span>
           <h2>{spell.displayName}</h2>
-          <span className="runes right-runes">ᛖᚼ</span>
+          <span className="runes right-runes">ᛖ{spell.rune}</span>
         </div>
         
         <div className="spell-divider">

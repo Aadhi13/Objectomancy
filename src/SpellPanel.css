@@ -65,14 +65,14 @@
 
 .spell-header h2 {
   font-family: var(--font-display);
-  font-size: 1.25rem;
-  color: var(--color-gold-light);
+  font-size: 1.15rem;
+  color: var(--spell-color);
   margin: 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .runes {
-  color: var(--color-gold-accent);
+  color: var(--spell-color);
   font-size: 1rem;
   opacity: 0.7;
   letter-spacing: 2px;
@@ -81,7 +81,7 @@
 .spell-divider {
   width: 80%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-gold-accent), transparent);
+  background: linear-gradient(90deg, transparent, var(--spell-color), transparent);
   margin: 8px 0 16px;
   position: relative;
   display: flex;
@@ -92,9 +92,9 @@
 .spell-divider .diamond {
   width: 6px;
   height: 6px;
-  background: var(--color-gold);
+  background: var(--spell-color);
   transform: rotate(45deg);
-  box-shadow: 0 0 5px var(--color-gold);
+  box-shadow: 0 0 5px var(--spell-color);
 }
 
 .spell-flavor {
@@ -108,7 +108,7 @@
 
 .spell-action-button {
   background: transparent;
-  border: 1px solid var(--color-gold-accent);
+  border: 1px solid var(--spell-color);
   color: var(--color-text-primary);
   font-family: var(--font-heading);
   font-size: 1rem;
@@ -123,9 +123,9 @@
 }
 
 .spell-action-button:hover {
-  background: rgba(217, 119, 6, 0.2);
-  color: var(--color-gold-light);
-  box-shadow: 0 0 15px rgba(217, 119, 6, 0.4);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--spell-color);
+  box-shadow: 0 0 15px var(--spell-color);
 }
 
 .spell-action-button:active {
@@ -138,7 +138,8 @@
   left: -100%;
   width: 50%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, var(--spell-color), transparent);
+  opacity: 0.3;
   transform: skewX(-20deg);
   animation: shine 3s infinite;
 }
@@ -201,7 +202,7 @@
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  border: 4px solid #48cae4;
+  border: 4px solid var(--spell-color);
   opacity: 0;
   animation: ripple 1.2s ease-out forwards;
 }
@@ -224,10 +225,48 @@
 
 /* Casting glow over panel */
 .spell-panel.casting {
-  border-color: #48cae4;
-  box-shadow: 0 0 30px rgba(72, 202, 228, 0.6), inset 0 0 20px rgba(72, 202, 228, 0.4);
+  border-color: var(--spell-color);
+  box-shadow: 0 0 30px var(--spell-color), inset 0 0 20px var(--spell-color);
   transition: all 0.3s ease;
 }
 .spell-panel.casting .spell-panel-glow {
-  background: radial-gradient(ellipse at center, rgba(72, 202, 228, 0.25) 0%, rgba(0, 0, 0, 0) 70%);
+  background: radial-gradient(ellipse at center, var(--spell-color) 0%, rgba(0, 0, 0, 0) 70%);
+  opacity: 0.3;
 }
+
+/* Spell Identity Section */
+.spell-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.spell-rune {
+  font-size: 2.5rem;
+  color: var(--spell-color);
+  text-shadow: 0 0 10px var(--spell-color);
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+.spell-meta {
+  display: flex;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.spell-element {
+  color: var(--spell-color);
+  font-weight: 600;
+}
+
+.spell-rarity {
+  color: var(--color-text-muted);
+}
+.rarity-uncommon { color: #22c55e; }
+.rarity-rare { color: #3b82f6; }
+.rarity-legendary { color: #f59e0b; }
