@@ -1,0 +1,348 @@
+/* DeepLab Benchmark — M21 Experiment Styles */
+
+.deeplab-benchmark {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #0d1117;
+  color: #c9d1d9;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Header */
+.bench-header {
+  text-align: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #21262d;
+  padding-bottom: 16px;
+}
+
+.bench-header h1 {
+  font-size: 1.6rem;
+  color: #58a6ff;
+  margin: 0 0 4px;
+}
+
+.bench-subtitle {
+  color: #8b949e;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.bench-backend {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #8b949e;
+}
+
+.bench-backend strong {
+  color: #3fb950;
+}
+
+/* Layout */
+.bench-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Video section */
+.bench-video-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bench-video-wrapper {
+  position: relative;
+  background: #161b22;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #21262d;
+  aspect-ratio: 16 / 9;
+}
+
+.bench-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.bench-mask-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.55;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.bench-waiting {
+  color: #8b949e;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Legend */
+.bench-legend {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.bench-legend h4 {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: #8b949e;
+}
+
+.legend-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.legend-chip {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+}
+
+.legend-dims {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  color: #484f58;
+}
+
+/* Controls section */
+.bench-controls-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bench-config {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.bench-config h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  color: #c9d1d9;
+}
+
+.bench-config label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: #8b949e;
+  margin-bottom: 10px;
+}
+
+.bench-config select {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+/* Actions */
+.bench-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bench-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.bench-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.bench-btn-primary {
+  background: #238636;
+  color: #fff;
+}
+
+.bench-btn-primary:hover:not(:disabled) {
+  background: #2ea043;
+}
+
+.bench-btn-secondary {
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+}
+
+.bench-btn-secondary:hover:not(:disabled) {
+  background: #30363d;
+}
+
+.bench-btn-danger {
+  background: #da3633;
+  color: #fff;
+}
+
+.bench-btn-danger:hover:not(:disabled) {
+  background: #f85149;
+}
+
+/* Single-shot panel */
+.bench-single-shots {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.bench-single-shots h4 {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  color: #c9d1d9;
+}
+
+.bench-single-shots p {
+  margin: 4px 0;
+  font-size: 0.8rem;
+  font-family: 'Fira Code', monospace;
+}
+
+.bench-note {
+  font-style: italic;
+  color: #8b949e;
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* Memory table */
+.bench-memory {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.bench-memory h4 {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: #c9d1d9;
+}
+
+.bench-memory table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.bench-memory th,
+.bench-memory td {
+  padding: 4px 8px;
+  text-align: left;
+  border-bottom: 1px solid #21262d;
+}
+
+.bench-memory th {
+  color: #8b949e;
+  font-weight: 500;
+}
+
+/* Results */
+.bench-results {
+  max-width: 1200px;
+  margin: 24px auto 0;
+  padding-top: 20px;
+  border-top: 1px solid #21262d;
+}
+
+.bench-results h2 {
+  font-size: 1.3rem;
+  color: #58a6ff;
+  margin: 0 0 16px;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.result-card {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.result-card-wide {
+  grid-column: 1 / -1;
+}
+
+.result-card h4 {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.result-card p {
+  margin: 2px 0;
+}
+
+.result-big {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #3fb950;
+  font-family: 'Fira Code', monospace;
+}
+
+.result-sub {
+  font-size: 0.75rem;
+  color: #484f58;
+}
+
+.class-rates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.class-rate {
+  font-size: 0.9rem;
+  color: #c9d1d9;
+}
+
+.class-rate strong {
+  color: #58a6ff;
+}
+
+.result-timings {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  color: #484f58;
+  word-break: break-all;
+}
