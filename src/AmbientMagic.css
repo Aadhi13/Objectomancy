@@ -2,7 +2,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 5; /* Above video, below UI */
+  z-index: 15;
   overflow: hidden;
 }
 
@@ -10,30 +10,33 @@
   position: absolute;
   width: 4px;
   height: 4px;
+  background: var(--color-gold-light, #fef08a);
   border-radius: 50%;
-  background: var(--color-gold-light);
-  box-shadow: 0 0 8px 2px var(--color-gold-accent);
+  box-shadow: 0 0 8px 2px rgba(217, 119, 6, 0.6);
   opacity: 0;
   animation: float-mote linear infinite;
 }
 
 @keyframes float-mote {
-  0% {
-    transform: translateY(0) translateX(0);
-    opacity: 0;
-  }
-  25% {
-    opacity: 0.5;
-  }
-  50% {
-    transform: translateY(-40px) translateX(15px);
-    opacity: 0.8;
-  }
-  75% {
-    opacity: 0.5;
-  }
-  100% {
-    transform: translateY(-80px) translateX(-15px);
-    opacity: 0;
-  }
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  20% { opacity: 0.8; }
+  80% { opacity: 0.8; }
+  100% { transform: translateY(-150px) scale(1.5); opacity: 0; }
+}
+
+.ambient-rune {
+  position: absolute;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--color-gold-accent);
+  opacity: 0;
+  text-shadow: 0 0 15px var(--color-gold);
+  animation: fade-rune linear infinite;
+}
+
+@keyframes fade-rune {
+  0% { opacity: 0; transform: translateY(0) scale(0.8); }
+  30% { opacity: 0.15; }
+  70% { opacity: 0.15; }
+  100% { opacity: 0; transform: translateY(-50px) scale(1.2); }
 }

@@ -1,17 +1,13 @@
 import { useState } from 'react';
 import './App.css';
 import Camera from './Camera';
+import { initAmbientAudio } from './audio';
 
 function App() {
   const [hasStarted, setHasStarted] = useState(false);
 
   const handleStart = () => {
-    // Resume or initialize audio context on first user interaction to bypass browser autoplay policies
-    if (window.audioCtx && window.audioCtx.state === 'suspended') {
-      window.audioCtx.resume();
-    } else if (!window.audioCtx) {
-      window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
+    initAmbientAudio();
     setHasStarted(true);
   };
 

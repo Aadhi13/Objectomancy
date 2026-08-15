@@ -1,9 +1,50 @@
-const getAudioContext = () => {
+let ambientOsc = null;
+
+export const getAudioContext = () => {
   if (!window.audioCtx) {
     window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
   return window.audioCtx;
 };
+
+export function initAmbientAudio() {
+  try {
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') ctx.resume();
+    
+    // Prevent multiple ambient drones
+    if (ambientOsc) return;
+    
+    ambientOsc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    // Low, subtle hum
+    ambientOsc.type = 'sine';
+    ambientOsc.frequency.setValueAtTime(55, ctx.currentTime); // Low A
+    
+    // LFO for slow volume modulation
+    const lfo = ctx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.setValueAtTime(0.05, ctx.currentTime); // 20-second cycle
+    
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.setValueAtTime(0.02, ctx.currentTime); // depth of modulation
+    
+    // Base gain extremely low (0.02)
+    gain.gain.setValueAtTime(0.02, ctx.currentTime);
+    
+    lfo.connect(lfoGain);
+    lfoGain.connect(gain.gain);
+    
+    ambientOsc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    ambientOsc.start();
+    lfo.start();
+  } catch(e) {
+    console.error("Ambient audio failed", e);
+  }
+}
 
 export function playDiscoveryChime() {
   try {

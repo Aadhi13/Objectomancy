@@ -5,6 +5,25 @@
   height: 100vh;
   background-color: #000;
   z-index: 10;
+  overflow: hidden;
+}
+
+/* Magical Vignette and Border */
+.camera-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+  background: radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.7) 95%, rgba(0, 0, 0, 0.95) 100%);
+  border: 4px solid rgba(217, 119, 6, 0.15); /* Subtly golden border */
+  box-shadow: inset 0 0 30px rgba(217, 119, 6, 0.1);
+  animation: pulse-vignette 8s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-vignette {
+  0% { opacity: 0.8; }
+  100% { opacity: 1; }
 }
 
 .camera-video {
