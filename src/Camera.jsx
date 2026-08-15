@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import '@tensorflow/tfjs';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
+import { getEnchantmentForClass } from './spells';
+import SpellPanel from './SpellPanel';
+import { playDiscoveryChime } from './audio';
 import './Camera.css';
 
 export default function Camera() {
@@ -15,6 +18,7 @@ export default function Camera() {
   
   // Store smoothed active detection for rendering
   const [activeDetection, setActiveDetection] = useState(null);
+  const [discoveryEvent, setDiscoveryEvent] = useState(null);
   
   // Hit/miss tracking state
   const trackingRef = useRef({
@@ -110,14 +114,15 @@ export default function Camera() {
             try {
               const predictions = await modelRef.current.detect(video);
               
-              // Filter for 'bottle' and confidence >= 0.6
-              const bottlePredictions = predictions.filter(
-                p => p.class === 'bottle' && p.score >= 0.6
+              // Filter for supported classes with valid enchantments and confidence >= 0.6
+              const supportedPredictions = predictions.filter(
+                p => getEnchantmentForClass(p.class) && p.score >= 0.6
               );
 
-              if (bottlePredictions.length > 0) {
-                // Focus on the most confident bottle
-                const bestBottle = bottlePredictions[0];
+              if (supportedPredictions.length > 0) {
+                // Focus on the most confident
+                const bestMatch = supportedPredictions[0];
+                const enchantment = getEnchantmentForClass(bestMatch.class);
                 
                 const vW = video.videoWidth;
                 const vH = video.videoHeight;
@@ -131,13 +136,15 @@ export default function Camera() {
                 const oX = (cW - dW) / 2;
                 const oY = (cH - dH) / 2;
 
-                const [x, y, w, h] = bestBottle.bbox;
+                const [x, y, w, h] = bestMatch.bbox;
                 const mappedBox = {
+                  class: bestMatch.class,
+                  enchantment,
                   x: x * scale + oX,
                   y: y * scale + oY,
                   width: w * scale,
                   height: h * scale,
-                  score: parseFloat(bestBottle.score.toFixed(2))
+                  score: parseFloat(bestMatch.score.toFixed(2))
                 };
                 
                 const t = trackingRef.current;
@@ -147,7 +154,16 @@ export default function Camera() {
                 // Trigger discovery after 2 valid hits
                 if (!t.isActive && t.hits >= 2) {
                   t.isActive = true;
-                  console.log("✨ Discovery event: New bottle found!");
+                  console.log(`✨ Discovery event: ${enchantment.displayName} found!`);
+                  playDiscoveryChime();
+                  
+                  setDiscoveryEvent({
+                    x: mappedBox.x,
+                    y: mappedBox.y,
+                    width: mappedBox.width,
+                    height: mappedBox.height
+                  });
+                  setTimeout(() => setDiscoveryEvent(null), 1000);
                 }
                 
                 if (t.isActive) {
@@ -155,6 +171,7 @@ export default function Camera() {
                     // Exponential moving average for positional smoothing
                     const alpha = 0.5;
                     t.box = {
+                      ...mappedBox,
                       x: t.box.x * (1 - alpha) + mappedBox.x * alpha,
                       y: t.box.y * (1 - alpha) + mappedBox.y * alpha,
                       width: t.box.width * (1 - alpha) + mappedBox.width * alpha,
@@ -164,7 +181,7 @@ export default function Camera() {
                     t.box = { ...mappedBox };
                   }
                   t.score = mappedBox.score;
-                  setActiveDetection({ ...t.box, score: t.score });
+                  setActiveDetection({ ...t.box });
                 }
               } else {
                 const t = trackingRef.current;
@@ -234,18 +251,21 @@ export default function Camera() {
         className={`camera-video ${!isLoading && !hasError ? 'visible' : 'hidden'}`}
       />
       
-      {activeDetection && (
-        <div
-          className="debug-box"
+      {discoveryEvent && (
+        <div 
+          className="discovery-flourish"
           style={{
-            left: `${activeDetection.x}px`,
-            top: `${activeDetection.y}px`,
-            width: `${activeDetection.width}px`,
-            height: `${activeDetection.height}px`
+            left: `${discoveryEvent.x + discoveryEvent.width/2}px`,
+            top: `${discoveryEvent.y + discoveryEvent.height/2}px`
           }}
         >
-          <span className="debug-label">Bottle: {activeDetection.score}</span>
+           <div className="flourish-ring"></div>
+           <div className="flourish-burst"></div>
         </div>
+      )}
+      
+      {activeDetection && activeDetection.enchantment && (
+        <SpellPanel detection={activeDetection} spell={activeDetection.enchantment} />
       )}
     </div>
   );

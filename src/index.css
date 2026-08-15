@@ -1,11 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Metamorphous&family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;1,400&display=swap');
+
 :root {
-  --text: #e0d8c8;
-  --bg: #121016;
-  --font-magic: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
-  font-family: var(--font-magic);
+  --color-base: #0d0614;
+  --color-surface: #1a1025;
+  --color-surface-secondary: #241632;
+  
+  --color-text-primary: #f5edf7;
+  --color-text-body: #d4c8db;
+  --color-text-muted: #a392b0;
+  
+  --color-gold: #f59e0b;
+  --color-gold-light: #fef3c7;
+  --color-gold-accent: #d97706;
+  --color-burgundy: #e20404;
+
+  --font-display: 'Cinzel Decorative', serif;
+  --font-heading: 'Metamorphous', cursive;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-magic: var(--font-heading);
+
+  font-family: var(--font-body);
   color-scheme: dark;
-  color: var(--text);
-  background: var(--bg);
+  color: var(--color-text-body);
+  background: var(--color-base);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
