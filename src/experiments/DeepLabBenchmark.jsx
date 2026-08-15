@@ -259,7 +259,7 @@ export default function DeepLabBenchmark() {
     console.log('=================================');
     setResults(benchResults);
     setStatus('done');
-  }, [cameraReady, selectedBase, quantBytes]);
+  }, [cameraReady, selectedBase, quantBytes, drawMask]);
 
   // Draw the segmentation mask onto the overlay canvas
   const drawMask = useCallback((segResult) => {

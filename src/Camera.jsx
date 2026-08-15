@@ -352,7 +352,7 @@ export default function Camera() {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [cameraStatus, modelStatus]);
+  }, [cameraStatus, modelStatus, discover, huntState]);
 
   const handleZoomChange = (e) => {
     const newZoom = Number(e.target.value);
