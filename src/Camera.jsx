@@ -26,6 +26,9 @@ export default function Camera() {
   const [activeDetections, setActiveDetections] = useState([]);
   const [discoveryEvents, setDiscoveryEvents] = useState([]);
   
+  // Track IDs that have completed their transformation sequence
+  const [revealedTracks, setRevealedTracks] = useState(new Set());
+  
   // Hardware Zoom & Lens state
   const [zoomCapability, setZoomCapability] = useState(null);
   const [zoomValue, setZoomValue] = useState(1);
@@ -284,17 +287,26 @@ export default function Camera() {
                   // Trigger discovery after 2 valid hits
                   if (!t.isActive && t.hits >= 2) {
                     t.isActive = true;
+                    t.transforming = true;
                     discover(t.class);
                     huntState.handleDiscovery(t.class);
                     console.log(`✨ Discovery event: ${t.enchantment.displayName} found!`);
                     discoveries.push({
                       id: Date.now() + i,
+                      trackId: t.id,
                       objectClass: t.class,
+                      enchantment: t.enchantment,
                       x: t.box.x,
                       y: t.box.y,
                       width: t.box.width,
                       height: t.box.height
                     });
+                    
+                    // After transformation completes (1.5s), reveal the SpellPanel
+                    const trackId = t.id;
+                    setTimeout(() => {
+                      setRevealedTracks(prev => new Set([...prev, trackId]));
+                    }, 1500);
                   }
                   
                   if (t.isActive) {
@@ -454,31 +466,24 @@ export default function Camera() {
         className={`camera-video ${!isLoading && !hasError ? 'visible' : 'hidden'}`}
       />
       
+      {/* True-Form transformation: fires once per discovery, auto-removes after 1.5s */}
       {discoveryEvents.map(evt => (
-        <React.Fragment key={evt.id}>
-          <TrueForm
-            x={evt.x}
-            y={evt.y}
-            width={evt.width}
-            height={evt.height}
-            objectClass={evt.objectClass}
-          />
-          <div 
-            className="discovery-flourish"
-            style={{
-              left: `${evt.x + evt.width/2}px`,
-              top: `${evt.y + evt.height/2}px`
-            }}
-          >
-             <div className="flourish-ring"></div>
-             <div className="flourish-burst"></div>
-          </div>
-        </React.Fragment>
+        <TrueForm
+          key={evt.id}
+          x={evt.x}
+          y={evt.y}
+          width={evt.width}
+          height={evt.height}
+          objectClass={evt.objectClass}
+        />
       ))}
       
-      {activeDetections.map(det => (
-        <SpellPanel key={det.id} detection={det.box} spell={det.enchantment} />
-      ))}
+      {/* SpellPanel: only renders AFTER the transformation completes (1.5s delay) */}
+      {activeDetections
+        .filter(det => revealedTracks.has(det.id))
+        .map(det => (
+          <SpellPanel key={det.id} detection={det.box} spell={det.enchantment} />
+        ))}
     </div>
   );
 }
