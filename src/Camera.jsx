@@ -20,6 +20,11 @@ export default function Camera() {
   const [activeDetection, setActiveDetection] = useState(null);
   const [discoveryEvent, setDiscoveryEvent] = useState(null);
   
+  // Hardware Zoom state
+  const [zoomCapability, setZoomCapability] = useState(null);
+  const [zoomValue, setZoomValue] = useState(1);
+  const videoTrackRef = useRef(null);
+  
   // Hit/miss tracking state
   const trackingRef = useRef({
     hits: 0,
@@ -39,17 +44,39 @@ export default function Camera() {
           throw new Error('Camera API not available in this browser');
         }
 
+        // Dynamically request portrait or landscape ideal framing to reduce CSS cropping
+        const isPortrait = window.innerHeight > window.innerWidth;
+        const idealWidth = isPortrait ? 720 : 1280;
+        const idealHeight = isPortrait ? 1280 : 720;
+
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
+            width: { ideal: idealWidth },
+            height: { ideal: idealHeight }
           }
         });
 
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           setCameraStatus('active');
+          
+          const track = stream.getVideoTracks()[0];
+          videoTrackRef.current = track;
+          
+          // Check for native hardware zoom support
+          if (track && typeof track.getCapabilities === 'function') {
+            const capabilities = track.getCapabilities();
+            if (capabilities.zoom) {
+              const settings = track.getSettings();
+              setZoomCapability({
+                min: capabilities.zoom.min,
+                max: capabilities.zoom.max,
+                step: capabilities.zoom.step
+              });
+              setZoomValue(settings.zoom || capabilities.zoom.min);
+            }
+          }
         }
       } catch (err) {
         setCameraStatus('error');
@@ -226,6 +253,16 @@ export default function Camera() {
     };
   }, [cameraStatus, modelStatus]);
 
+  const handleZoomChange = (e) => {
+    const newZoom = Number(e.target.value);
+    setZoomValue(newZoom);
+    if (videoTrackRef.current && typeof videoTrackRef.current.applyConstraints === 'function') {
+      videoTrackRef.current.applyConstraints({
+        advanced: [{ zoom: newZoom }]
+      }).catch(err => console.error("Failed to apply zoom:", err));
+    }
+  };
+
   const isLoading = cameraStatus === 'loading' || modelStatus === 'loading';
   const hasError = cameraStatus === 'error' || modelStatus === 'error';
 
@@ -240,6 +277,21 @@ export default function Camera() {
       {hasError && (
         <div className="camera-status error">
           <p>{errorMsg}</p>
+        </div>
+      )}
+
+      {zoomCapability && !isLoading && !hasError && (
+        <div className="camera-zoom-control">
+          <input 
+            type="range"
+            className="zoom-slider"
+            min={zoomCapability.min}
+            max={zoomCapability.max}
+            step={zoomCapability.step}
+            value={zoomValue}
+            onChange={handleZoomChange}
+            aria-label="Camera Zoom"
+          />
         </div>
       )}
 
