@@ -20,10 +20,14 @@ export default function Camera() {
   const [activeDetection, setActiveDetection] = useState(null);
   const [discoveryEvent, setDiscoveryEvent] = useState(null);
   
-  // Hardware Zoom state
+  // Hardware Zoom & Lens state
   const [zoomCapability, setZoomCapability] = useState(null);
   const [zoomValue, setZoomValue] = useState(1);
   const videoTrackRef = useRef(null);
+  const [isArcaneSightOpen, setIsArcaneSightOpen] = useState(false);
+  const [availableCameras, setAvailableCameras] = useState([]);
+  const [selectedCameraId, setSelectedCameraId] = useState('');
+  const hasFetchedCamerasRef = useRef(false);
   
   // Hit/miss tracking state
   const trackingRef = useRef({
@@ -44,17 +48,23 @@ export default function Camera() {
           throw new Error('Camera API not available in this browser');
         }
 
-        // Dynamically request portrait or landscape ideal framing to reduce CSS cropping
         const isPortrait = window.innerHeight > window.innerWidth;
         const idealWidth = isPortrait ? 720 : 1280;
         const idealHeight = isPortrait ? 1280 : 720;
 
+        const videoConstraints = {
+          width: { ideal: idealWidth },
+          height: { ideal: idealHeight }
+        };
+
+        if (selectedCameraId) {
+          videoConstraints.deviceId = { exact: selectedCameraId };
+        } else {
+          videoConstraints.facingMode = 'environment';
+        }
+
         stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: 'environment',
-            width: { ideal: idealWidth },
-            height: { ideal: idealHeight }
-          }
+          video: videoConstraints
         });
 
         if (videoRef.current) {
@@ -64,7 +74,6 @@ export default function Camera() {
           const track = stream.getVideoTracks()[0];
           videoTrackRef.current = track;
           
-          // Check for native hardware zoom support
           if (track && typeof track.getCapabilities === 'function') {
             const capabilities = track.getCapabilities();
             if (capabilities.zoom) {
@@ -75,7 +84,18 @@ export default function Camera() {
                 step: capabilities.zoom.step
               });
               setZoomValue(settings.zoom || capabilities.zoom.min);
+            } else {
+              setZoomCapability(null);
             }
+          } else {
+            setZoomCapability(null);
+          }
+
+          if (!hasFetchedCamerasRef.current) {
+            hasFetchedCamerasRef.current = true;
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(d => d.kind === 'videoinput');
+            setAvailableCameras(videoDevices);
           }
         }
       } catch (err) {
@@ -97,7 +117,7 @@ export default function Camera() {
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, []);
+  }, [selectedCameraId]);
 
   // Setup model
   useEffect(() => {
@@ -280,19 +300,64 @@ export default function Camera() {
         </div>
       )}
 
-      {zoomCapability && !isLoading && !hasError && (
-        <div className="camera-zoom-control">
-          <input 
-            type="range"
-            className="zoom-slider"
-            min={zoomCapability.min}
-            max={zoomCapability.max}
-            step={zoomCapability.step}
-            value={zoomValue}
-            onChange={handleZoomChange}
-            aria-label="Camera Zoom"
-          />
-        </div>
+      {!isLoading && !hasError && (
+        <>
+          {isArcaneSightOpen && (
+            <div 
+              className="arcane-backdrop" 
+              onClick={() => setIsArcaneSightOpen(false)}
+            ></div>
+          )}
+          <div className="arcane-sight-container">
+            {isArcaneSightOpen && (
+              <div className="arcane-sight-panel">
+                <h4>Arcane Sight</h4>
+                <div className="spell-divider"><div className="diamond"></div></div>
+                
+                {availableCameras.length > 1 && (
+                  <div className="arcane-control-group">
+                    <label>Lens Focus</label>
+                    <select 
+                      value={selectedCameraId || (videoTrackRef.current?.getSettings()?.deviceId) || ''} 
+                      onChange={(e) => setSelectedCameraId(e.target.value)}
+                    >
+                      {availableCameras.map((cam, i) => (
+                        <option key={cam.deviceId} value={cam.deviceId}>
+                          {cam.label || `Lens ${i + 1}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                
+                {zoomCapability ? (
+                  <div className="arcane-control-group">
+                    <label>Scrying Depth (Zoom)</label>
+                    <input 
+                      type="range"
+                      className="zoom-slider"
+                      min={zoomCapability.min}
+                      max={zoomCapability.max}
+                      step={zoomCapability.step}
+                      value={zoomValue}
+                      onChange={handleZoomChange}
+                    />
+                  </div>
+                ) : (
+                  <p className="arcane-unsupported">Scrying depth fixed.</p>
+                )}
+              </div>
+            )}
+            
+            <button 
+              className="arcane-sight-toggle"
+              onClick={() => setIsArcaneSightOpen(!isArcaneSightOpen)}
+              aria-label="Toggle Arcane Sight"
+            >
+              <span className="runes">ᛟ</span>
+            </button>
+          </div>
+        </>
       )}
 
       <video 
