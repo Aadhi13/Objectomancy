@@ -71,12 +71,9 @@ export default function Camera() {
           throw new Error('Camera API not available in this browser');
         }
 
-        // Request a resolution that matches the device's current orientation
-        // to prevent heavy horizontal cropping from object-fit: cover on mobile devices.
-        const isPortrait = window.innerHeight > window.innerWidth;
         const videoConstraints = {
-          width: { ideal: isPortrait ? 720 : 1280 },
-          height: { ideal: isPortrait ? 1280 : 720 }
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
         };
 
         if (selectedCameraId) {
