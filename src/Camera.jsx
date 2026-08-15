@@ -75,10 +75,8 @@ export default function Camera() {
         // to prevent heavy horizontal cropping from object-fit: cover on mobile devices.
         const isPortrait = window.innerHeight > window.innerWidth;
         const videoConstraints = {
-          //width: { ideal: isPortrait ? 720 : 1280 },
-          //height: { ideal: isPortrait ? 1280 : 720 }
-          width: { ideal: 3072 },
-          height: { ideal: 4080 }
+          width: { ideal: isPortrait ? 720 : 1280 },
+          height: { ideal: isPortrait ? 1280 : 720 }
         };
 
         if (selectedCameraId) {
