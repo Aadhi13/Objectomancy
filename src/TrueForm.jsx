@@ -4,18 +4,11 @@ import './TrueForm.css';
 export default function TrueForm({ detection, type }) {
   if (type !== 'bottle') return null;
 
-  // Use a fixed size centered on the bounding box to prevent 
-  // massive detections from causing the effects to cover the entire screen.
-  const width = 200;
-  const height = 300;
-  const cx = detection.x + detection.width / 2;
-  const cy = detection.y + detection.height / 2;
-
   const style = {
-    left: `${cx - width / 2}px`,
-    top: `${cy - height / 2}px`,
-    width: `${width}px`,
-    height: `${height}px`
+    left: `${detection.x}px`,
+    top: `${detection.y}px`,
+    width: `${detection.width}px`,
+    height: `${detection.height}px`
   };
 
   return (
