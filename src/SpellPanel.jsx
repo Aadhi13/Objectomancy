@@ -18,12 +18,68 @@ export default function SpellPanel({ detection, spell }) {
     }, 1500);
   };
 
-  // Anchor to the bottom center of the detected object
+  // Calculate viewport-aware placement
+  const panelWidth = 280;
+  const panelHeight = 280; // Safe assumed max height
+  const padding = 20;
+
+  const vW = window.innerWidth;
+  const vH = window.innerHeight;
+
+  const targetX = detection.x + detection.width / 2;
+  const targetBottom = detection.y + detection.height;
+  const targetTop = detection.y;
+
+  // Clamp X
+  let left = targetX;
+  const halfW = panelWidth / 2;
+  if (left - halfW < padding) left = padding + halfW;
+  if (left + halfW > vW - padding) left = vW - padding - halfW;
+
+  // Vertical placement
+  let top;
+  let isAbove = false;
+  const spaceBelow = vH - targetBottom;
+  const spaceAbove = targetTop;
+
+  if (spaceBelow >= panelHeight + padding) {
+    // Fits perfectly below
+    top = targetBottom + 20;
+  } else if (spaceAbove >= panelHeight + padding) {
+    // Fits perfectly above
+    top = targetTop - panelHeight - 20;
+    isAbove = true;
+  } else {
+    // Screen is too small, keep it in view based on largest space
+    if (spaceBelow > spaceAbove) {
+      top = vH - panelHeight - padding;
+    } else {
+      top = padding;
+      isAbove = true;
+    }
+  }
+
   const panelStyle = {
-    left: `${detection.x + detection.width / 2}px`,
-    top: `${detection.y + detection.height + 20}px`,
+    left: `${left}px`,
+    top: `${top}px`,
     transform: 'translateX(-50%)',
+    transformOrigin: isAbove ? 'bottom center' : 'top center',
     '--spell-color': spell.color || 'var(--color-gold-accent)'
+  };
+  
+  // Tether connector line pointing back to the actual object center X
+  const dx = targetX - left;
+  const tetherStyle = {
+    position: 'absolute',
+    width: '2px',
+    height: '20px',
+    left: `calc(50% + ${dx}px)`,
+    background: isAbove 
+      ? 'linear-gradient(to top, var(--spell-color), transparent)' 
+      : 'linear-gradient(to bottom, var(--spell-color), transparent)',
+    top: isAbove ? '100%' : '-20px',
+    opacity: 0.5,
+    pointerEvents: 'none'
   };
 
   const renderSpellEffect = (type) => {
@@ -79,7 +135,8 @@ export default function SpellPanel({ detection, spell }) {
   };
 
   return (
-    <div className={`spell-panel ${isCasting ? 'casting' : ''}`} style={panelStyle}>
+    <div className={`spell-panel ${isCasting ? 'casting' : ''} ${isAbove ? 'placed-above' : 'placed-below'}`} style={panelStyle}>
+      <div className="spell-tether" style={tetherStyle}></div>
       <div className="spell-panel-glow"></div>
       
       {/* Spell visual effect container */}
