@@ -13,8 +13,17 @@ export default function Camera() {
   const [modelStatus, setModelStatus] = useState('loading');
   const [errorMsg, setErrorMsg] = useState('');
   
-  // Store mapped bounding boxes for rendering
-  const [debugBoxes, setDebugBoxes] = useState([]);
+  // Store smoothed active detection for rendering
+  const [activeDetection, setActiveDetection] = useState(null);
+  
+  // Hit/miss tracking state
+  const trackingRef = useRef({
+    hits: 0,
+    misses: 0,
+    isActive: false,
+    box: null,
+    score: 0
+  });
 
   // Setup camera
   useEffect(() => {
@@ -28,7 +37,7 @@ export default function Camera() {
 
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: 'environment', // Prefer back camera
+            facingMode: 'environment',
             width: { ideal: 1280 },
             height: { ideal: 720 }
           }
@@ -107,6 +116,9 @@ export default function Camera() {
               );
 
               if (bottlePredictions.length > 0) {
+                // Focus on the most confident bottle
+                const bestBottle = bottlePredictions[0];
+                
                 const vW = video.videoWidth;
                 const vH = video.videoHeight;
                 const cW = video.clientWidth;
@@ -119,20 +131,53 @@ export default function Camera() {
                 const oX = (cW - dW) / 2;
                 const oY = (cH - dH) / 2;
 
-                const mappedBoxes = bottlePredictions.map(p => {
-                  const [x, y, w, h] = p.bbox;
-                  return {
-                    x: x * scale + oX,
-                    y: y * scale + oY,
-                    width: w * scale,
-                    height: h * scale,
-                    score: p.score.toFixed(2)
-                  };
-                });
+                const [x, y, w, h] = bestBottle.bbox;
+                const mappedBox = {
+                  x: x * scale + oX,
+                  y: y * scale + oY,
+                  width: w * scale,
+                  height: h * scale,
+                  score: parseFloat(bestBottle.score.toFixed(2))
+                };
                 
-                setDebugBoxes(mappedBoxes);
+                const t = trackingRef.current;
+                t.misses = 0;
+                t.hits++;
+                
+                // Trigger discovery after 2 valid hits
+                if (!t.isActive && t.hits >= 2) {
+                  t.isActive = true;
+                  console.log("✨ Discovery event: New bottle found!");
+                }
+                
+                if (t.isActive) {
+                  if (t.box) {
+                    // Exponential moving average for positional smoothing
+                    const alpha = 0.5;
+                    t.box = {
+                      x: t.box.x * (1 - alpha) + mappedBox.x * alpha,
+                      y: t.box.y * (1 - alpha) + mappedBox.y * alpha,
+                      width: t.box.width * (1 - alpha) + mappedBox.width * alpha,
+                      height: t.box.height * (1 - alpha) + mappedBox.height * alpha,
+                    };
+                  } else {
+                    t.box = { ...mappedBox };
+                  }
+                  t.score = mappedBox.score;
+                  setActiveDetection({ ...t.box, score: t.score });
+                }
               } else {
-                setDebugBoxes([]);
+                const t = trackingRef.current;
+                t.hits = 0;
+                t.misses++;
+                
+                // Hide after 5 consecutive misses
+                if (t.isActive && t.misses >= 5) {
+                  t.isActive = false;
+                  t.box = null;
+                  setActiveDetection(null);
+                  console.log("💨 Object lost.");
+                }
               }
             } catch (err) {
               console.error("Detection error:", err);
@@ -189,20 +234,19 @@ export default function Camera() {
         className={`camera-video ${!isLoading && !hasError ? 'visible' : 'hidden'}`}
       />
       
-      {debugBoxes.map((box, index) => (
+      {activeDetection && (
         <div
-          key={index}
           className="debug-box"
           style={{
-            left: `${box.x}px`,
-            top: `${box.y}px`,
-            width: `${box.width}px`,
-            height: `${box.height}px`
+            left: `${activeDetection.x}px`,
+            top: `${activeDetection.y}px`,
+            width: `${activeDetection.width}px`,
+            height: `${activeDetection.height}px`
           }}
         >
-          <span className="debug-label">Bottle: {box.score}</span>
+          <span className="debug-label">Bottle: {activeDetection.score}</span>
         </div>
-      ))}
+      )}
     </div>
   );
 }
