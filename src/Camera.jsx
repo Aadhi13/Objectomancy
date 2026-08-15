@@ -48,13 +48,9 @@ export default function Camera() {
           throw new Error('Camera API not available in this browser');
         }
 
-        const isPortrait = window.innerHeight > window.innerWidth;
-        const idealWidth = isPortrait ? 720 : 1280;
-        const idealHeight = isPortrait ? 1280 : 720;
-
         const videoConstraints = {
-          width: { ideal: idealWidth },
-          height: { ideal: idealHeight }
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
         };
 
         if (selectedCameraId) {
