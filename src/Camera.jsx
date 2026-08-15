@@ -12,6 +12,9 @@ export default function Camera() {
   const [cameraStatus, setCameraStatus] = useState('loading'); 
   const [modelStatus, setModelStatus] = useState('loading');
   const [errorMsg, setErrorMsg] = useState('');
+  
+  // Store mapped bounding boxes for rendering
+  const [debugBoxes, setDebugBoxes] = useState([]);
 
   // Setup camera
   useEffect(() => {
@@ -62,7 +65,6 @@ export default function Camera() {
 
     async function loadModel() {
       try {
-        // Load the COCO-SSD model
         const loadedModel = await cocoSsd.load();
         if (isMounted) {
           modelRef.current = loadedModel;
@@ -105,13 +107,32 @@ export default function Camera() {
               );
 
               if (bottlePredictions.length > 0) {
-                // Log normalized detection data for debugging
-                const logData = bottlePredictions.map(p => ({
-                  class: p.class,
-                  confidence: parseFloat(p.score.toFixed(3)),
-                  bbox: p.bbox, // [x, y, width, height]
-                }));
-                console.log('Detection:', logData);
+                const vW = video.videoWidth;
+                const vH = video.videoHeight;
+                const cW = video.clientWidth;
+                const cH = video.clientHeight;
+
+                // Map coordinates accounting for object-fit: cover
+                const scale = Math.max(cW / vW, cH / vH);
+                const dW = vW * scale;
+                const dH = vH * scale;
+                const oX = (cW - dW) / 2;
+                const oY = (cH - dH) / 2;
+
+                const mappedBoxes = bottlePredictions.map(p => {
+                  const [x, y, w, h] = p.bbox;
+                  return {
+                    x: x * scale + oX,
+                    y: y * scale + oY,
+                    width: w * scale,
+                    height: h * scale,
+                    score: p.score.toFixed(2)
+                  };
+                });
+                
+                setDebugBoxes(mappedBoxes);
+              } else {
+                setDebugBoxes([]);
               }
             } catch (err) {
               console.error("Detection error:", err);
@@ -167,6 +188,21 @@ export default function Camera() {
         muted 
         className={`camera-video ${!isLoading && !hasError ? 'visible' : 'hidden'}`}
       />
+      
+      {debugBoxes.map((box, index) => (
+        <div
+          key={index}
+          className="debug-box"
+          style={{
+            left: `${box.x}px`,
+            top: `${box.y}px`,
+            width: `${box.width}px`,
+            height: `${box.height}px`
+          }}
+        >
+          <span className="debug-label">Bottle: {box.score}</span>
+        </div>
+      ))}
     </div>
   );
 }

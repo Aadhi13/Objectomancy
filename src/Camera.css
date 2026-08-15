@@ -41,3 +41,24 @@
 .camera-status.error {
   color: #e20404; /* Burgundy from DESIGN.md */
 }
+
+.debug-box {
+  position: absolute;
+  border: 4px dashed #00ff00;
+  box-sizing: border-box;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.debug-label {
+  position: absolute;
+  top: -24px;
+  left: -4px;
+  background-color: #00ff00;
+  color: #000;
+  padding: 2px 4px;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 14px;
+  white-space: nowrap;
+}
