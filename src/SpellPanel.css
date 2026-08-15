@@ -197,7 +197,8 @@
   border-radius: 4px;
 }
 
-.water-ripple {
+/* Spell Effects */
+.effect-ripple {
   position: absolute;
   width: 100px;
   height: 100px;
@@ -206,21 +207,94 @@
   opacity: 0;
   animation: ripple 1.2s ease-out forwards;
 }
-
-.water-ripple.delay-1 { animation-delay: 0.2s; }
-.water-ripple.delay-2 { animation-delay: 0.4s; }
+.effect-ripple.delay-1 { animation-delay: 0.2s; }
+.effect-ripple.delay-2 { animation-delay: 0.4s; }
 
 @keyframes ripple {
-  0% {
-    width: 0;
-    height: 0;
-    opacity: 0.8;
-  }
-  100% {
-    width: 400px;
-    height: 400px;
-    opacity: 0;
-  }
+  0% { width: 0; height: 0; opacity: 0.8; }
+  100% { width: 400px; height: 400px; opacity: 0; }
+}
+
+/* Runes */
+.effect-rune {
+  position: absolute;
+  font-family: var(--font-display);
+  color: var(--spell-color);
+  font-size: 2rem;
+  text-shadow: 0 0 10px var(--spell-color);
+  opacity: 0;
+  animation: float-up-fade 1s ease-out forwards;
+}
+.effect-rune.r1 { left: 20%; animation-delay: 0.1s; }
+.effect-rune.r2 { left: 40%; animation-delay: 0.3s; }
+.effect-rune.r3 { left: 60%; animation-delay: 0.2s; }
+.effect-rune.r4 { left: 80%; animation-delay: 0.4s; }
+.effect-rune.r5 { left: 50%; animation-delay: 0.5s; }
+
+@keyframes float-up-fade {
+  0% { transform: translateY(20px); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-80px); opacity: 0; }
+}
+
+/* Lightning */
+.effect-lightning {
+  position: absolute;
+  width: 2px;
+  height: 100%;
+  background: var(--spell-color);
+  box-shadow: 0 0 10px 2px var(--spell-color);
+  opacity: 0;
+  transform-origin: bottom center;
+}
+.effect-lightning.l1 { left: 30%; transform: rotate(15deg); animation: flash 0.3s ease-out forwards; }
+.effect-lightning.l2 { left: 50%; transform: rotate(-5deg); animation: flash 0.3s ease-out forwards 0.2s; }
+.effect-lightning.l3 { left: 70%; transform: rotate(20deg); animation: flash 0.3s ease-out forwards 0.4s; }
+
+@keyframes flash {
+  0% { opacity: 0; height: 0; }
+  20% { opacity: 1; height: 120%; }
+  100% { opacity: 0; height: 120%; }
+}
+
+/* Steam/Aura */
+.effect-steam {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle at center, var(--spell-color) 0%, transparent 70%);
+  opacity: 0;
+  filter: blur(8px);
+  animation: rise-billow 1.2s ease-in forwards;
+}
+.effect-steam.s1 { left: 25%; animation-delay: 0s; }
+.effect-steam.s2 { left: 50%; animation-delay: 0.3s; }
+.effect-steam.s3 { left: 75%; animation-delay: 0.1s; }
+
+@keyframes rise-billow {
+  0% { transform: translateY(30px) scale(0.5); opacity: 0; }
+  50% { opacity: 0.6; }
+  100% { transform: translateY(-100px) scale(2); opacity: 0; }
+}
+
+/* Vortex */
+.effect-vortex {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border-top: 6px solid var(--spell-color);
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid var(--spell-color);
+  border-left: 6px solid transparent;
+  opacity: 0;
+  animation: spin-vortex 1.2s cubic-bezier(0.5, 0, 0.5, 1) forwards;
+}
+
+@keyframes spin-vortex {
+  0% { transform: scale(1.5) rotate(0deg); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: scale(0) rotate(720deg); opacity: 0; }
 }
 
 /* Casting glow over panel */

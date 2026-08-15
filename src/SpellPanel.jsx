@@ -26,6 +26,58 @@ export default function SpellPanel({ detection, spell }) {
     '--spell-color': spell.color || 'var(--color-gold-accent)'
   };
 
+  const renderSpellEffect = (type) => {
+    switch (type) {
+      case 'ripple':
+        return (
+          <>
+            <div className="effect-ripple"></div>
+            <div className="effect-ripple delay-1"></div>
+            <div className="effect-ripple delay-2"></div>
+          </>
+        );
+      case 'runes':
+        return (
+          <>
+            <div className="effect-rune r1">ᛈ</div>
+            <div className="effect-rune r2">ᚢ</div>
+            <div className="effect-rune r3">ᛋ</div>
+            <div className="effect-rune r4">ᚱ</div>
+            <div className="effect-rune r5">ᛗ</div>
+          </>
+        );
+      case 'lightning':
+        return (
+          <>
+            <div className="effect-lightning l1"></div>
+            <div className="effect-lightning l2"></div>
+            <div className="effect-lightning l3"></div>
+          </>
+        );
+      case 'steam':
+      case 'aura':
+        return (
+          <>
+            <div className="effect-steam s1"></div>
+            <div className="effect-steam s2"></div>
+            <div className="effect-steam s3"></div>
+          </>
+        );
+      case 'vortex':
+        return (
+          <div className="effect-vortex"></div>
+        );
+      default:
+        return (
+          <>
+            <div className="effect-ripple"></div>
+            <div className="effect-ripple delay-1"></div>
+            <div className="effect-ripple delay-2"></div>
+          </>
+        );
+    }
+  };
+
   return (
     <div className={`spell-panel ${isCasting ? 'casting' : ''}`} style={panelStyle}>
       <div className="spell-panel-glow"></div>
@@ -33,9 +85,7 @@ export default function SpellPanel({ detection, spell }) {
       {/* Spell visual effect container */}
       {isCasting && (
         <div className="spell-effect-container">
-          <div className="water-ripple"></div>
-          <div className="water-ripple delay-1"></div>
-          <div className="water-ripple delay-2"></div>
+          {renderSpellEffect(spell.spellEffect)}
         </div>
       )}
 

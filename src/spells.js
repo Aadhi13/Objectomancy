@@ -7,7 +7,8 @@ export const SPELLS = {
     element: "Water",
     color: "#0ea5e9", // cyan
     rune: "ᛗ",
-    rarity: "Common"
+    rarity: "Common",
+    spellEffect: "ripple"
   },
   cup: {
     id: 'cup',
@@ -17,7 +18,8 @@ export const SPELLS = {
     element: "Fire",
     color: "#f97316", // orange
     rune: "ᚢ",
-    rarity: "Common"
+    rarity: "Common",
+    spellEffect: "steam"
   },
   book: {
     id: 'book',
@@ -27,7 +29,8 @@ export const SPELLS = {
     element: "Arcane",
     color: "#a855f7", // purple
     rune: "ᛈ",
-    rarity: "Rare"
+    rarity: "Rare",
+    spellEffect: "runes"
   },
   laptop: {
     id: 'laptop',
@@ -37,7 +40,8 @@ export const SPELLS = {
     element: "Lightning",
     color: "#eab308", // gold/yellow
     rune: "ᛋ",
-    rarity: "Legendary"
+    rarity: "Legendary",
+    spellEffect: "lightning"
   },
   "cell phone": {
     id: 'cell phone',
@@ -47,7 +51,8 @@ export const SPELLS = {
     element: "Divination",
     color: "#ec4899", // pink
     rune: "ᛟ",
-    rarity: "Uncommon"
+    rarity: "Uncommon",
+    spellEffect: "runes"
   },
   chair: {
     id: 'chair',
@@ -57,7 +62,8 @@ export const SPELLS = {
     element: "Earth",
     color: "#22c55e", // green
     rune: "ᛒ",
-    rarity: "Common"
+    rarity: "Common",
+    spellEffect: "aura"
   },
   backpack: {
     id: 'backpack',
@@ -67,7 +73,8 @@ export const SPELLS = {
     element: "Spatial",
     color: "#8b5cf6", // violet
     rune: "ᚺ",
-    rarity: "Rare"
+    rarity: "Rare",
+    spellEffect: "vortex"
   },
   keyboard: {
     id: 'keyboard',
@@ -77,7 +84,8 @@ export const SPELLS = {
     element: "Order",
     color: "#64748b", // slate
     rune: "ᚱ",
-    rarity: "Uncommon"
+    rarity: "Uncommon",
+    spellEffect: "runes"
   },
   mouse: {
     id: 'mouse',
@@ -87,7 +95,8 @@ export const SPELLS = {
     element: "Beast",
     color: "#f43f5e", // rose
     rune: "ᚷ",
-    rarity: "Uncommon"
+    rarity: "Uncommon",
+    spellEffect: "lightning"
   },
   handbag: {
     id: 'handbag',
@@ -97,7 +106,8 @@ export const SPELLS = {
     element: "Shadow",
     color: "#737373", // neutral
     rune: "ᚦ",
-    rarity: "Rare"
+    rarity: "Rare",
+    spellEffect: "steam"
   }
 };
 
