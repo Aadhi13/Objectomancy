@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import '@tensorflow/tfjs';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import { getEnchantmentForClass } from './spells';
 import SpellPanel from './SpellPanel';
 import AmbientMagic from './AmbientMagic';
+import TrueForm from './TrueForm';
 import { playDiscoveryChime } from './audio';
 import { useGrimoire } from './useGrimoire';
 import Grimoire from './Grimoire';
@@ -288,6 +289,7 @@ export default function Camera() {
                     console.log(`✨ Discovery event: ${t.enchantment.displayName} found!`);
                     discoveries.push({
                       id: Date.now() + i,
+                      objectClass: t.class,
                       x: t.box.x,
                       y: t.box.y,
                       width: t.box.width,
@@ -305,7 +307,7 @@ export default function Camera() {
                   setDiscoveryEvents(prev => [...prev, ...discoveries]);
                   setTimeout(() => {
                     setDiscoveryEvents(prev => prev.filter(d => !discoveries.find(nd => nd.id === d.id)));
-                  }, 1000);
+                  }, 1500);
                 }
 
                 setActiveDetections(activeList);
@@ -453,17 +455,25 @@ export default function Camera() {
       />
       
       {discoveryEvents.map(evt => (
-        <div 
-          key={evt.id}
-          className="discovery-flourish"
-          style={{
-            left: `${evt.x + evt.width/2}px`,
-            top: `${evt.y + evt.height/2}px`
-          }}
-        >
-           <div className="flourish-ring"></div>
-           <div className="flourish-burst"></div>
-        </div>
+        <React.Fragment key={evt.id}>
+          <TrueForm
+            x={evt.x}
+            y={evt.y}
+            width={evt.width}
+            height={evt.height}
+            objectClass={evt.objectClass}
+          />
+          <div 
+            className="discovery-flourish"
+            style={{
+              left: `${evt.x + evt.width/2}px`,
+              top: `${evt.y + evt.height/2}px`
+            }}
+          >
+             <div className="flourish-ring"></div>
+             <div className="flourish-burst"></div>
+          </div>
+        </React.Fragment>
       ))}
       
       {activeDetections.map(det => (
