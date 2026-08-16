@@ -99,6 +99,26 @@ export default function DeepLabBenchmark() {
     return () => cancelAnimationFrame(rafId);
   }, []);
 
+  // Draw the segmentation mask onto the overlay canvas
+  const drawMask = useCallback((segResult) => {
+    if (!maskCanvasRef.current || !segResult) return;
+    const canvas = maskCanvasRef.current;
+    canvas.width = segResult.width;
+    canvas.height = segResult.height;
+    const ctx = canvas.getContext('2d');
+    const imageData = new ImageData(
+      new Uint8ClampedArray(segResult.segmentationMap.buffer),
+      segResult.width,
+      segResult.height
+    );
+    ctx.putImageData(imageData, 0, 0);
+    setLiveSegResult({
+      legend: segResult.legend,
+      width: segResult.width,
+      height: segResult.height,
+    });
+  }, []);
+
   const runBenchmark = useCallback(async () => {
     if (!cameraReady) return;
     setStatus('loading-model');
@@ -261,25 +281,6 @@ export default function DeepLabBenchmark() {
     setStatus('done');
   }, [cameraReady, selectedBase, quantBytes, drawMask]);
 
-  // Draw the segmentation mask onto the overlay canvas
-  const drawMask = useCallback((segResult) => {
-    if (!maskCanvasRef.current || !segResult) return;
-    const canvas = maskCanvasRef.current;
-    canvas.width = segResult.width;
-    canvas.height = segResult.height;
-    const ctx = canvas.getContext('2d');
-    const imageData = new ImageData(
-      new Uint8ClampedArray(segResult.segmentationMap.buffer),
-      segResult.width,
-      segResult.height
-    );
-    ctx.putImageData(imageData, 0, 0);
-    setLiveSegResult({
-      legend: segResult.legend,
-      width: segResult.width,
-      height: segResult.height,
-    });
-  }, []);
 
   // Live segmentation loop (simulates event-triggered usage)
   const toggleLive = useCallback(async () => {
