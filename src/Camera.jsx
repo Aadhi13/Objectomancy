@@ -5,6 +5,7 @@ import { getEnchantmentForClass } from './spells';
 import SpellPanel from './SpellPanel';
 import AmbientMagic from './AmbientMagic';
 import TrueForm from './TrueForm';
+import ARTransformationCanvas from './ARTransformationCanvas';
 import { playDiscoveryChime } from './audio';
 import { useGrimoire } from './useGrimoire';
 import Grimoire from './Grimoire';
@@ -35,6 +36,7 @@ export default function Camera() {
   const [availableCameras, setAvailableCameras] = useState([]);
   const [selectedCameraId, setSelectedCameraId] = useState('');
   const hasFetchedCamerasRef = useRef(false);
+  const [is3DMode, setIs3DMode] = useState(true);
   
   // Grimoire state
   const { discovered, discover } = useGrimoire();
@@ -471,6 +473,17 @@ export default function Camera() {
                 ) : (
                   <p className="arcane-unsupported">Scrying depth fixed.</p>
                 )}
+
+                <div className="arcane-control-group" style={{ marginTop: '10px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={is3DMode}
+                      onChange={(e) => setIs3DMode(e.target.checked)}
+                    />
+                    <span>3D AR Relics Mode</span>
+                  </label>
+                </div>
               </div>
             )}
             
@@ -505,6 +518,9 @@ export default function Camera() {
         muted 
         className={`camera-video ${!isLoading && !hasError ? 'visible' : 'hidden'}`}
       />
+
+      {/* 3D WebGL AR Transformation Layer */}
+      <ARTransformationCanvas activeDetections={activeDetections} castingTracks={castingTracks} enabled={is3DMode} />
       
       {/* True-Form transformation */}
       {[...activeDetections, ...fadingTracks].map(det => {

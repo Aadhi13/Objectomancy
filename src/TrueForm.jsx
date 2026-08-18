@@ -19,6 +19,7 @@ export default function TrueForm({ x, y, width, height, objectClass, isFading, p
   const rune = form.rune || spell.rune || 'ᛟ';
   const runeColor = form.runeColor || '#f5f5f5';
   const runeY = form.runeY || 48;
+  const preserveAspectRatio = form.preserveAspectRatio || 'xMidYMid meet';
 
   const style = {
     left: `${x}px`,
@@ -34,7 +35,17 @@ export default function TrueForm({ x, y, width, height, objectClass, isFading, p
 
   return (
     <div className={`true-form ${isRevealed ? 'revealed' : ''}`} style={style}>
-      {/* Phase 1: Glow  (250ms) */}
+      {/* Full bounding-box covering energy aura */}
+      <div className="tf-aura-container">
+        {/* Corner rune accents */}
+        <div className="tf-corner top-left">✦</div>
+        <div className="tf-corner top-right">✦</div>
+        <div className="tf-corner bottom-left">✦</div>
+        <div className="tf-corner bottom-right">✦</div>
+        <div className="tf-bounding-glow" />
+      </div>
+
+      {/* Phase 1: Glow (250ms) */}
       {!isRevealed && <div className="tf-phase tf-glow" />}
 
       {/* Phase 2: Runes (450ms) */}
@@ -51,7 +62,7 @@ export default function TrueForm({ x, y, width, height, objectClass, isFading, p
 
       {/* Phase 4+5: True-form artwork (850ms → stable at 1400ms) */}
       <div className={`tf-phase tf-artwork ${isRevealed ? 'tf-artwork-stable' : ''}`}>
-        <svg viewBox={form.svgViewBox} className="tf-svg">
+        <svg viewBox={form.svgViewBox} className="tf-svg" preserveAspectRatio={preserveAspectRatio}>
           {(form.paths || []).map((p, i) => (
             <path key={i} d={p.d} className={p.className} />
           ))}
@@ -78,3 +89,4 @@ export default function TrueForm({ x, y, width, height, objectClass, isFading, p
     </div>
   );
 }
+
