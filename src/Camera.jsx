@@ -24,10 +24,8 @@ export default function Camera() {
   
   // Store smoothed active detections for rendering
   const [activeDetections, setActiveDetections] = useState([]);
-  const [discoveryEvents, setDiscoveryEvents] = useState([]);
-  
-  // Track IDs that have completed their transformation sequence
-  const [revealedTracks, setRevealedTracks] = useState(new Set());
+  const [fadingTracks, setFadingTracks] = useState([]);
+  const [castingTracks, setCastingTracks] = useState(new Set());
   
   // Hardware Zoom & Lens state
   const [zoomCapability, setZoomCapability] = useState(null);
@@ -40,10 +38,34 @@ export default function Camera() {
   
   // Grimoire state
   const { discovered, discover } = useGrimoire();
+  const discoverRef = useRef(discover);
+  discoverRef.current = discover;
   const [isGrimoireOpen, setIsGrimoireOpen] = useState(false);
+  
+  // Onboarding state
+  const [showInstructions, setShowInstructions] = useState(true);
   
   // Hunt state
   const huntState = useHunt();
+  const huntStateRef = useRef(huntState);
+  huntStateRef.current = huntState;
+
+  // Timers state for cleanup
+  const timersRef = useRef(new Set());
+  const scheduleTimer = (callback, delay) => {
+    const id = setTimeout(() => {
+      callback();
+      timersRef.current.delete(id);
+    }, delay);
+    timersRef.current.add(id);
+  };
+
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach(clearTimeout);
+      timersRef.current.clear();
+    };
+  }, []);
   
   // Hit/miss tracking state array
   const trackingRef = useRef([]);
@@ -261,7 +283,9 @@ export default function Camera() {
                       isActive: false,
                       box: { ...pred },
                       score: pred.score,
-                      matchedThisFrame: true
+                      matchedThisFrame: true,
+                      phase: 'pending',
+                      discoveryStartTime: 0
                     });
                   }
                 });
@@ -270,6 +294,7 @@ export default function Camera() {
                 const activeList = [];
                 const discoveries = [];
                 
+                const now = Date.now();
                 for (let i = tracks.length - 1; i >= 0; i--) {
                   const t = tracks[i];
                   if (!t.matchedThisFrame) {
@@ -279,7 +304,10 @@ export default function Camera() {
                   
                   // Hide after 5 consecutive misses
                   if (t.misses >= 5) {
-                    if (t.isActive) console.log(`💨 Object lost: ${t.enchantment.displayName}`);
+                    if (t.isActive) {
+                      console.log(`💨 Object lost: ${t.enchantment.displayName}`);
+                      setFadingTracks(prev => [...prev, { ...t, box: { ...t.box }, fadeStartTime: now }]);
+                    }
                     tracks.splice(i, 1);
                     continue;
                   }
@@ -287,42 +315,34 @@ export default function Camera() {
                   // Trigger discovery after 2 valid hits
                   if (!t.isActive && t.hits >= 2) {
                     t.isActive = true;
-                    t.transforming = true;
-                    discover(t.class);
-                    huntState.handleDiscovery(t.class);
+                    t.discoveryStartTime = now;
+                    t.phase = 'discovering';
+                    discoverRef.current(t.class);
+                    huntStateRef.current.handleDiscovery(t.class);
                     console.log(`✨ Discovery event: ${t.enchantment.displayName} found!`);
-                    discoveries.push({
-                      id: Date.now() + i,
-                      trackId: t.id,
-                      objectClass: t.class,
-                      enchantment: t.enchantment,
-                      x: t.box.x,
-                      y: t.box.y,
-                      width: t.box.width,
-                      height: t.box.height
-                    });
-                    
-                    // After transformation completes (1.5s), reveal the SpellPanel
-                    const trackId = t.id;
-                    setTimeout(() => {
-                      setRevealedTracks(prev => new Set([...prev, trackId]));
-                    }, 1500);
+                    playDiscoveryChime(t.class);
+                    discoveries.push(t);
+                    setShowInstructions(false);
                   }
                   
                   if (t.isActive) {
+                    const elapsed = now - t.discoveryStartTime;
+                    if (elapsed > 1500) {
+                      t.phase = 'revealed';
+                    } else if (elapsed > 850) {
+                      t.phase = 'transforming';
+                    } else {
+                      t.phase = 'discovering';
+                    }
                     activeList.push({ ...t, box: { ...t.box } });
                   }
                 }
 
-                if (discoveries.length > 0) {
-                  playDiscoveryChime();
-                  setDiscoveryEvents(prev => [...prev, ...discoveries]);
-                  setTimeout(() => {
-                    setDiscoveryEvents(prev => prev.filter(d => !discoveries.find(nd => nd.id === d.id)));
-                  }, 1500);
-                }
-
                 setActiveDetections(activeList);
+                setFadingTracks(prev => {
+                  const next = prev.filter(f => now - f.fadeStartTime < 300);
+                  return next.length === prev.length ? prev : next;
+                });
               }
             } catch (err) {
               console.error("Detection error:", err);
@@ -351,8 +371,10 @@ export default function Camera() {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
+      timersRef.current.forEach(clearTimeout);
+      timersRef.current.clear();
     };
-  }, [cameraStatus, modelStatus, discover, huntState]);
+  }, [cameraStatus, modelStatus]);
 
   const handleZoomChange = (e) => {
     const newZoom = Number(e.target.value);
@@ -362,6 +384,17 @@ export default function Camera() {
         advanced: [{ zoom: newZoom }]
       }).catch(err => console.error("Failed to apply zoom:", err));
     }
+  };
+
+  const handleCastSpell = (trackId) => {
+    setCastingTracks(prev => new Set([...prev, trackId]));
+    setTimeout(() => {
+      setCastingTracks(prev => {
+        const next = new Set(prev);
+        next.delete(trackId);
+        return next;
+      });
+    }, 1500);
   };
 
   const isLoading = cameraStatus === 'loading' || modelStatus === 'loading';
@@ -386,6 +419,13 @@ export default function Camera() {
           <AmbientMagic />
           
           <HuntPanel {...huntState} />
+          
+          {showInstructions && (
+            <div className="onboarding-overlay" onClick={() => setShowInstructions(false)}>
+              <p>Point the monocle at a bottle, book, phone, cup, or other artifact.</p>
+              <button className="dismiss-btn">Dismiss</button>
+            </div>
+          )}
           
           {isArcaneSightOpen && (
             <div 
@@ -466,23 +506,82 @@ export default function Camera() {
         className={`camera-video ${!isLoading && !hasError ? 'visible' : 'hidden'}`}
       />
       
-      {/* True-Form transformation: fires once per discovery, auto-removes after 1.5s */}
-      {discoveryEvents.map(evt => (
-        <TrueForm
-          key={evt.id}
-          x={evt.x}
-          y={evt.y}
-          width={evt.width}
-          height={evt.height}
-          objectClass={evt.objectClass}
-        />
-      ))}
+      {/* True-Form transformation */}
+      {[...activeDetections, ...fadingTracks].map(det => {
+        const isFading = !!det.fadeStartTime;
+        return (
+          <TrueForm
+            key={det.id}
+            x={det.box.x}
+            y={det.box.y}
+            width={det.box.width}
+            height={det.box.height}
+            objectClass={det.class}
+            isFading={isFading}
+            phase={det.phase}
+          />
+        );
+      })}
       
-      {/* SpellPanel: only renders AFTER the transformation completes (1.5s delay) */}
+      {/* World Spell Effects */}
       {activeDetections
-        .filter(det => revealedTracks.has(det.id))
+        .filter(det => castingTracks.has(det.id))
+        .map(det => {
+          const style = {
+            position: 'absolute',
+            left: `${det.box.x}px`,
+            top: `${det.box.y}px`,
+            width: `${det.box.width}px`,
+            height: `${det.box.height}px`,
+            pointerEvents: 'none',
+            zIndex: 45,
+            '--spell-color': det.enchantment.color || 'var(--color-gold-accent)'
+          };
+          const effectType = det.enchantment.worldEffect || det.enchantment.spellEffect;
+          return (
+            <div key={`spell-${det.id}`} className="world-spell-container" style={style}>
+              {effectType === 'ripple' && (
+                <>
+                  <div className="effect-ripple"></div>
+                  <div className="effect-ripple delay-1"></div>
+                  <div className="effect-ripple delay-2"></div>
+                </>
+              )}
+              {effectType === 'runes' && (
+                <>
+                  <div className="effect-rune r1">ᛈ</div>
+                  <div className="effect-rune r2">ᚢ</div>
+                  <div className="effect-rune r3">ᛋ</div>
+                  <div className="effect-rune r4">ᚱ</div>
+                  <div className="effect-rune r5">ᛗ</div>
+                </>
+              )}
+              {effectType === 'lightning' && (
+                <>
+                  <div className="effect-lightning l1"></div>
+                  <div className="effect-lightning l2"></div>
+                  <div className="effect-lightning l3"></div>
+                </>
+              )}
+              {(effectType === 'steam' || effectType === 'aura') && (
+                <>
+                  <div className="effect-steam s1"></div>
+                  <div className="effect-steam s2"></div>
+                  <div className="effect-steam s3"></div>
+                </>
+              )}
+              {effectType === 'vortex' && (
+                <div className="effect-vortex"></div>
+              )}
+            </div>
+          );
+        })}
+      
+      {/* SpellPanel: only renders AFTER the transformation completes (revealed) */}
+      {activeDetections
+        .filter(det => det.phase === 'revealed')
         .map(det => (
-          <SpellPanel key={det.id} detection={det.box} spell={det.enchantment} />
+          <SpellPanel key={det.id} detection={det.box} spell={det.enchantment} onCast={() => handleCastSpell(det.id)} />
         ))}
     </div>
   );

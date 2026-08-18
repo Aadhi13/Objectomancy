@@ -269,3 +269,48 @@
   border: none;
   box-shadow: 0 0 10px var(--color-gold-accent);
 }
+
+.world-spell-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: visible;
+}
+
+.onboarding-overlay {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-surface);
+  border: 1px solid var(--color-gold-accent);
+  padding: 12px 24px;
+  border-radius: 4px;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+  cursor: pointer;
+  animation: slide-down 0.5s ease-out;
+}
+.onboarding-overlay p {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-gold-light);
+  font-size: 0.9rem;
+  text-align: center;
+}
+.onboarding-overlay .dismiss-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+@keyframes slide-down {
+  from { opacity: 0; transform: translate(-50%, -20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}

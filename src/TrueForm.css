@@ -99,6 +99,12 @@
   100% { opacity: 0.85; transform: scale(1) translateY(0); }
 }
 
+.tf-artwork-stable {
+  opacity: 0.85;
+  transform: scale(1) translateY(0);
+  animation: none !important;
+}
+
 /* ── SVG internals — generic classes driven by data ── */
 .tf-svg {
   width: 100%;

@@ -1,9 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { playSpellChime } from './audio';
 import './SpellPanel.css';
 
-export default function SpellPanel({ detection, spell }) {
+export default function SpellPanel({ detection, spell, onCast }) {
   const [isCasting, setIsCasting] = useState(false);
+  const panelRef = useRef(null);
+  const [panelHeight, setPanelHeight] = useState(280);
+
+  useEffect(() => {
+    if (!panelRef.current) return;
+    const observer = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        if (entry.contentRect.height > 0) {
+          // add padding to measured content box height
+          setPanelHeight(entry.contentRect.height + 40);
+        }
+      }
+    });
+    observer.observe(panelRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   if (!detection || !spell) return null;
 
@@ -11,6 +27,7 @@ export default function SpellPanel({ detection, spell }) {
     if (isCasting) return;
     setIsCasting(true);
     playSpellChime();
+    if (onCast) onCast();
     
     // Reset casting state after animation
     setTimeout(() => {
@@ -20,7 +37,6 @@ export default function SpellPanel({ detection, spell }) {
 
   // Calculate viewport-aware placement
   const panelWidth = 280;
-  const panelHeight = 280; // Safe assumed max height
   const padding = 20;
 
   const vW = window.innerWidth;
@@ -82,69 +98,10 @@ export default function SpellPanel({ detection, spell }) {
     pointerEvents: 'none'
   };
 
-  const renderSpellEffect = (type) => {
-    switch (type) {
-      case 'ripple':
-        return (
-          <>
-            <div className="effect-ripple"></div>
-            <div className="effect-ripple delay-1"></div>
-            <div className="effect-ripple delay-2"></div>
-          </>
-        );
-      case 'runes':
-        return (
-          <>
-            <div className="effect-rune r1">ᛈ</div>
-            <div className="effect-rune r2">ᚢ</div>
-            <div className="effect-rune r3">ᛋ</div>
-            <div className="effect-rune r4">ᚱ</div>
-            <div className="effect-rune r5">ᛗ</div>
-          </>
-        );
-      case 'lightning':
-        return (
-          <>
-            <div className="effect-lightning l1"></div>
-            <div className="effect-lightning l2"></div>
-            <div className="effect-lightning l3"></div>
-          </>
-        );
-      case 'steam':
-      case 'aura':
-        return (
-          <>
-            <div className="effect-steam s1"></div>
-            <div className="effect-steam s2"></div>
-            <div className="effect-steam s3"></div>
-          </>
-        );
-      case 'vortex':
-        return (
-          <div className="effect-vortex"></div>
-        );
-      default:
-        return (
-          <>
-            <div className="effect-ripple"></div>
-            <div className="effect-ripple delay-1"></div>
-            <div className="effect-ripple delay-2"></div>
-          </>
-        );
-    }
-  };
-
   return (
-    <div className={`spell-panel ${isCasting ? 'casting' : ''} ${isAbove ? 'placed-above' : 'placed-below'}`} style={panelStyle}>
+    <div ref={panelRef} className={`spell-panel ${isCasting ? 'casting' : ''} ${isAbove ? 'placed-above' : 'placed-below'}`} style={panelStyle}>
       <div className="spell-tether" style={tetherStyle}></div>
       <div className="spell-panel-glow"></div>
-      
-      {/* Spell visual effect container */}
-      {isCasting && (
-        <div className="spell-effect-container">
-          {renderSpellEffect(spell.spellEffect)}
-        </div>
-      )}
 
       <div className="spell-panel-content">
         <div className="spell-identity">

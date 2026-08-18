@@ -4,13 +4,13 @@ import { SPELLS } from './spells';
 import './TrueForm.css';
 
 /**
- * True-Form Transformation — data-driven, fires ONCE per discovery event.
+ * True-Form Transformation — data-driven.
  *
  * Reads asset config from trueForms.js. Falls back to a generic arcane circle
  * for objects without a dedicated true-form asset. Uses CSS custom properties
  * (--tf-color) for per-object color theming, identical pattern to SpellPanel.
  */
-export default function TrueForm({ x, y, width, height, objectClass }) {
+export default function TrueForm({ x, y, width, height, objectClass, isFading, phase }) {
   const spell = SPELLS[objectClass];
   if (!spell) return null;
 
@@ -25,26 +25,32 @@ export default function TrueForm({ x, y, width, height, objectClass }) {
     top: `${y}px`,
     width: `${width}px`,
     height: `${height}px`,
-    '--tf-color': color
+    '--tf-color': color,
+    opacity: isFading ? 0 : 1,
+    transition: 'opacity 0.3s ease-out, left 0.1s linear, top 0.1s linear, width 0.1s linear, height 0.1s linear'
   };
 
+  const isRevealed = phase === 'revealed';
+
   return (
-    <div className="true-form" style={style}>
+    <div className={`true-form ${isRevealed ? 'revealed' : ''}`} style={style}>
       {/* Phase 1: Glow  (250ms) */}
-      <div className="tf-phase tf-glow" />
+      {!isRevealed && <div className="tf-phase tf-glow" />}
 
       {/* Phase 2: Runes (450ms) */}
-      <div className="tf-phase tf-runes">
-        <span>{rune}</span>
-        <span>{spell.rune}</span>
-        <span>{rune}</span>
-      </div>
+      {!isRevealed && (
+        <div className="tf-phase tf-runes">
+          <span>{rune}</span>
+          <span>{spell.rune}</span>
+          <span>{rune}</span>
+        </div>
+      )}
 
       {/* Phase 3: Energy ring (650ms) */}
-      <div className="tf-phase tf-energy" />
+      {!isRevealed && <div className="tf-phase tf-energy" />}
 
       {/* Phase 4+5: True-form artwork (850ms → stable at 1400ms) */}
-      <div className="tf-phase tf-artwork">
+      <div className={`tf-phase tf-artwork ${isRevealed ? 'tf-artwork-stable' : ''}`}>
         <svg viewBox={form.svgViewBox} className="tf-svg">
           {(form.paths || []).map((p, i) => (
             <path key={i} d={p.d} className={p.className} />

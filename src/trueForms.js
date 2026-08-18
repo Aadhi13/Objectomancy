@@ -100,6 +100,144 @@ export const TRUE_FORMS = {
     runeY: 35,
     color: '#eab308',
     runeColor: '#fef9c3'
+  },
+
+  cup: {
+    svgViewBox: '0 0 80 80',
+    paths: [
+      {
+        d: 'M10 30 C10 80 70 80 70 30 Z',
+        className: 'tf-path-outline'
+      },
+      {
+        d: 'M15 35 C15 75 65 75 65 35 Z',
+        className: 'tf-path-fill'
+      },
+      {
+        d: 'M5 30 L75 30 M20 20 L20 10 M40 25 L40 5 M60 20 L60 10',
+        className: 'tf-path-detail'
+      }
+    ],
+    rune: 'ᚢ',
+    runeY: 55,
+    color: '#f97316',
+    runeColor: '#ffedd5'
+  },
+
+  chair: {
+    svgViewBox: '0 0 80 120',
+    paths: [
+      {
+        d: 'M20 10 L60 10 L60 60 L75 60 L75 110 L65 110 L65 70 L15 70 L15 110 L5 110 L5 60 L20 60 Z',
+        className: 'tf-path-outline'
+      },
+      {
+        d: 'M25 15 L55 15 L55 55 L25 55 Z',
+        className: 'tf-path-fill'
+      },
+      {
+        d: 'M15 65 L65 65',
+        className: 'tf-path-accent'
+      }
+    ],
+    rune: 'ᛒ',
+    runeY: 45,
+    color: '#22c55e',
+    runeColor: '#dcfce7'
+  },
+
+  backpack: {
+    svgViewBox: '0 0 80 100',
+    paths: [
+      {
+        d: 'M20 30 C20 10 60 10 60 30 L70 90 C70 95 10 95 10 90 Z',
+        className: 'tf-path-outline'
+      },
+      {
+        d: 'M25 35 L55 35 L65 85 L15 85 Z',
+        className: 'tf-path-fill'
+      },
+      {
+        d: 'M30 40 L50 40 L50 60 L30 60 Z',
+        className: 'tf-path-detail'
+      }
+    ],
+    rects: [
+      { x: 35, y: 15, width: 10, height: 10, rx: 2, className: 'tf-path-accent' }
+    ],
+    rune: 'ᚺ',
+    runeY: 65,
+    color: '#8b5cf6',
+    runeColor: '#ede9fe'
+  },
+
+  keyboard: {
+    svgViewBox: '0 0 120 60',
+    paths: [
+      {
+        d: 'M5 15 L115 15 L110 50 L10 50 Z',
+        className: 'tf-path-outline'
+      },
+      {
+        d: 'M15 25 L105 25 L102 42 L18 42 Z',
+        className: 'tf-path-fill'
+      }
+    ],
+    rects: [
+      { x: 25, y: 30, width: 70, height: 8, rx: 1, className: 'tf-path-accent' }
+    ],
+    rune: 'ᚱ',
+    runeY: 38,
+    color: '#64748b',
+    runeColor: '#f1f5f9'
+  },
+
+  mouse: {
+    svgViewBox: '0 0 60 90',
+    paths: [
+      {
+        d: 'M30 10 C10 10 10 40 10 60 C10 80 50 80 50 60 C50 40 50 10 30 10 Z',
+        className: 'tf-path-outline'
+      },
+      {
+        d: 'M20 30 C20 20 40 20 40 30 C40 40 20 40 20 30 Z',
+        className: 'tf-path-fill'
+      },
+      {
+        d: 'M30 10 L30 40 M30 70 L30 90 M20 80 L40 80',
+        className: 'tf-path-detail'
+      }
+    ],
+    rune: 'ᚷ',
+    runeY: 60,
+    color: '#f43f5e',
+    runeColor: '#ffe4e6'
+  },
+
+  handbag: {
+    svgViewBox: '0 0 90 90',
+    paths: [
+      {
+        d: 'M15 40 L75 40 L85 80 L5 80 Z',
+        className: 'tf-path-outline'
+      },
+      {
+        d: 'M25 40 C25 10 65 10 65 40',
+        className: 'tf-path-outline'
+      },
+      {
+        d: 'M20 45 L70 45 L78 75 L12 75 Z',
+        className: 'tf-path-fill'
+      },
+      {
+        d: 'M40 50 L50 50 L50 60 L40 60 Z',
+        className: 'tf-path-accent'
+      }
+    ],
+    rune: 'ᚦ',
+    runeY: 65,
+    color: '#737373',
+    runeColor: '#f5f5f5'
   }
 };
 

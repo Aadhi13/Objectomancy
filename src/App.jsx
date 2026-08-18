@@ -17,13 +17,19 @@ function App() {
         <div className="landing-screen">
           <div className="landing-content">
             <h1>Objectomancy</h1>
-            <p className="subtitle">A mystical augmented reality</p>
+            <p className="subtitle">The forgotten art of seeing what things really are.</p>
             
-            <div className="spell-divider" style={{ margin: '2rem 0' }}>
+            <div className="spell-divider" style={{ margin: '1.5rem 0' }}>
               <div className="diamond"></div>
             </div>
             
-            <button className="spell-action-button" onClick={handleStart}>
+            <ul className="landing-instructions">
+              <li>Point camera at an ordinary object</li>
+              <li>Reveal its hidden true form</li>
+              <li>Cast a spell</li>
+            </ul>
+
+            <button className="spell-action-button" onClick={handleStart} style={{ marginTop: '2rem' }}>
               <span className="button-text">Open the Monocle</span>
               <span className="button-glow"></span>
             </button>

@@ -7,9 +7,12 @@ export function useHunt() {
   const [discoveredInHunt, setDiscoveredInHunt] = useState([]);
 
   const startHunt = useCallback(() => {
-    // Pick 5 random items from SPELLS
-    const allIds = Object.keys(SPELLS);
-    const shuffled = [...allIds].sort(() => 0.5 - Math.random());
+    // Curated demo-friendly set
+    const demoPool = ['bottle', 'cup', 'book', 'cell phone', 'laptop', 'backpack'];
+    const validPool = demoPool.filter(id => SPELLS[id]);
+    
+    // Pick 5 random items from validPool
+    const shuffled = [...validPool].sort(() => 0.5 - Math.random());
     setTargets(shuffled.slice(0, 5));
     setDiscoveredInHunt([]);
     setIsActive(true);
